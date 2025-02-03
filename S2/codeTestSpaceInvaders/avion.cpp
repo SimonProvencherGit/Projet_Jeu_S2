@@ -21,7 +21,7 @@ public:
     Entity(int x, int y, char s) : x(x), y(y), symbol(s) {}
     virtual ~Entity() = default;
     virtual void update() {}
-    virtual bool isColliding(int px, int py) const { return px == x && py == y; }
+    virtual bool isColliding(int px, int py) const { return px == x && py == y; }  //si x et y sont égaux à px et py on retourne true
 };
 
 class Player : public Entity {
@@ -48,8 +48,7 @@ class Bullet : public Entity {
 public:
     bool isPlayerBullet;
     
-    Bullet(int x, int y, bool isPlayer) 
-        : Entity(x, y, '|'), isPlayerBullet(isPlayer) {}
+    Bullet(int x, int y, bool isPlayer) : Entity(x, y, '|'), isPlayerBullet(isPlayer) {}
     
     void update() override {
         // Si c'est une balle du joueur, elle se déplace vers le haut ; sinon vers le bas.
