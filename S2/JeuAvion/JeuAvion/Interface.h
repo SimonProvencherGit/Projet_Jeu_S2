@@ -15,9 +15,9 @@ const int HEIGHT = 20;
 class Interface 
 {
     private:
-    unique_ptr<Joueur> joueur;
+    Joueur* joueur;
     vector<unique_ptr<Entite>> listEntites;
-    vector<vector<Entite*>> affichage;
+
     int score;
     bool gameOver;
     int enemyDirection;
@@ -28,11 +28,11 @@ class Interface
     ~Interface();
     void gererInput();
     void updateAffichage();
-    void updateEntites();
     void gererCollisions();
     void enleverEntites();
     void executionJeu();
-
+	void hideCursor();
+	void showCursor();
 };
 
 #endif // INTERFACE_H

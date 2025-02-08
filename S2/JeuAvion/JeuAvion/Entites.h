@@ -9,30 +9,33 @@ class Entite {
     protected:
     int tailleLong;
     int tailleLarg;
-    char symbole;
 
     public:
     int posX, posY;
     bool enVie;
+    char symbole;
+	int nbVies;
 
     Entite(int x, int y, char symb);
     virtual ~Entite() = default;
-    virtual void update();
+    virtual void update() = 0;
+	//virtual void perdVie();
     virtual bool enCollision(int px, int py);  // retourne vrai si px et py sont egaux au x et y de l'entite
 };
 
 
 class Joueur : public Entite {
     private:
-    int nbVies;
     int attkDmg;
     int vitesse;
     int vitesseAttk;
+	
 
     public:
     Joueur(int x, int y);       //probalement autre chose a ajouter
     ~Joueur();
-    void perdVie();
+	void perdVie();
+	void update() override;     //gere le deplacement du joueur
 };
 
 class Ennemi : public Entite {
@@ -42,15 +45,17 @@ class Ennemi : public Entite {
     int vitesse;
     int vitesseAttk;
     int nbVies;
+    int enemyMoveTimer;
 public:
     Ennemi(int x, int y);
     ~Ennemi();
     void perdVie();
+	void update() override;     //gere le deplacement de l'ennemi
 };
 
 class Bullet : public Entite {
     private :
-    bool tirAllie;
+	bool tirAllie;    //pour savoir si la balle est tiree par le joueur ou l'ennemi, détermine le sens du deplacement
 
     public:
     Bullet(int x, int y, bool isPlayerBullet);

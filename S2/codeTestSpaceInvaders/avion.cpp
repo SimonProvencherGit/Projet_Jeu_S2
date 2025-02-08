@@ -21,16 +21,15 @@ public:
     Entity(int x, int y, char s) : x(x), y(y), symbol(s) {}
     virtual ~Entity() = default;
     virtual void update() {}
-    virtual bool isColliding(int px, int py) const { return px == x && py == y; }  //si x et y sont égaux à px et py on retourne true
+    virtual bool isColliding(int px, int py) const { return px == x && py == y; }
 };
 
 class Player : public Entity {
 public:
     int lives;
-    
+
     Player(int x, int y) : Entity(x, y, '^'), lives(3) {}
 
-    // Le joueur perd une vie lorsqu'il est touché
     void loseLife() {
         lives--;
         if (lives <= 0) {
@@ -47,14 +46,13 @@ public:
 class Bullet : public Entity {
 public:
     bool isPlayerBullet;
-    
+
     Bullet(int x, int y, bool isPlayer) : Entity(x, y, '|'), isPlayerBullet(isPlayer) {}
-    
+
     void update() override {
-        // Si c'est une balle du joueur, elle se déplace vers le haut ; sinon vers le bas.
-        if(isPlayerBullet) 
+        if (isPlayerBullet)
             y--;
-        else 
+        else
             y++;
     }
 };
@@ -62,103 +60,76 @@ public:
 class Barrier : public Entity {
 public:
     int health;
-    
+
     Barrier(int x, int y) : Entity(x, y, '#'), health(5) {}
-    
+
     void update() override {
-        // Si la barrière n'a plus de santé, on la désactive.
-        if(health <= 0) active = false;
+        if (health <= 0) active = false;
     }
 };
 
 class Game {
-    unique_ptr<Player> player;
     vector<unique_ptr<Entity>> entities;
-    vector<vector<Entity*>> grid;
+    Player* playerPtr;
     int score = 0;
     bool gameOver = false;
     int enemyDirection = 1;
     int enemyMoveTimer = 0;
 
-    // Double-buffer pour le rendu
-    char buffer[HEIGHT][WIDTH];
-
 public:
-    Game() : grid(HEIGHT, vector<Entity*>(WIDTH, nullptr)) {
+    Game() {
         setup();
     }
 
     void setup() {
-        // Création du joueur au centre en bas de l'écran
-        player = make_unique<Player>(WIDTH/2, HEIGHT-1);
-
-        // Création d'une formation d'ennemis (5 colonnes x 3 lignes)
+        // Create enemies
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 3; j++) {
-                entities.emplace_back(
-                    make_unique<Enemy>(5 + i * 5, 2 + j * 2)
-                );
+                entities.emplace_back(make_unique<Enemy>(5 + i * 5, 2 + j * 2));
             }
         }
 
-        // Création de barrières à des positions fixes
-        int barrierX[4] = {10, 20, 30, 40};
+        // Create barriers
+        int barrierX[4] = { 10, 20, 30, 40 };
         for (int x : barrierX) {
             entities.emplace_back(make_unique<Barrier>(x, 15));
         }
-    }
 
-    void updateGrid() {
-        // Réinitialise la grille
-        for (auto& row : grid)
-            fill(row.begin(), row.end(), nullptr);
-
-        // Place le joueur (s'il est actif)
-        if (player->active)
-            grid[player->y][player->x] = player.get();
-
-        // Place les autres entités actives dans la grille
-        for (auto& e : entities) {
-            if (e->active && e->y >= 0 && e->y < HEIGHT && e->x >= 0 && e->x < WIDTH) {
-                grid[e->y][e->x] = e.get();
-            }
-        }
+        // Create player and add to entities
+        entities.emplace_back(make_unique<Player>(WIDTH / 2, HEIGHT - 1));
+        playerPtr = static_cast<Player*>(entities.back().get());
     }
 
     void handleInput() {
         if (_kbhit()) {
             int key = _getch();
             switch (key) {
-                case 75: // Flèche gauche
-                    if (player->x > 0) player->x--;
-                    break;
-                case 77: // Flèche droite
-                    if (player->x < WIDTH - 1) player->x++;
-                    break;
-                case 32: // Espace pour tirer
-                    entities.emplace_back(
-                        make_unique<Bullet>(player->x, player->y - 1, true)
-                    );
-                    break;
-                case 'q': // Quitter le jeu
-                    gameOver = true;
-                    break;
+            case 75: // Left arrow
+                if (playerPtr->x > 0) playerPtr->x--;
+                break;
+            case 77: // Right arrow
+                if (playerPtr->x < WIDTH - 1) playerPtr->x++;
+                break;
+            case 32: // Space to shoot
+                entities.emplace_back(make_unique<Bullet>(playerPtr->x, playerPtr->y - 1, true));
+                break;
+            case 'q': // Quit
+                gameOver = true;
+                break;
             }
         }
     }
 
     void updateEntities() {
-        // Mise à jour de chaque entité
         for (auto& e : entities) {
             e->update();
-            // Pour les balles, si elles sortent de l'écran, on les désactive
             if (auto bullet = dynamic_cast<Bullet*>(e.get())) {
                 if (bullet->y < 0 || bullet->y >= HEIGHT)
                     bullet->active = false;
             }
         }
 
-        // Mouvement collectif des ennemis
+        // Enemy movement
         if (enemyMoveTimer++ > 1) {
             bool edgeReached = false;
             for (auto& e : entities) {
@@ -178,7 +149,7 @@ public:
             enemyMoveTimer = 0;
         }
 
-        // Tir aléatoire des ennemis
+        // Enemy shooting
         static int enemyShootTimer = 0;
         if (enemyShootTimer++ > 10) {
             vector<Enemy*> activeEnemies;
@@ -189,24 +160,19 @@ public:
             }
             if (!activeEnemies.empty()) {
                 Enemy* shooter = activeEnemies[rand() % activeEnemies.size()];
-                entities.emplace_back(
-                    make_unique<Bullet>(shooter->x, shooter->y + 1, false)
-                );
+                entities.emplace_back(make_unique<Bullet>(shooter->x, shooter->y + 1, false));
             }
             enemyShootTimer = 0;
         }
 
-        // Gestion des collisions
         checkCollisions();
         cleanupEntities();
     }
 
     void checkCollisions() {
-        // Parcours de toutes les entités pour gérer les collisions
         for (auto& bulletEntity : entities) {
             if (auto b = dynamic_cast<Bullet*>(bulletEntity.get())) {
                 if (b->isPlayerBullet) {
-                    // Collision : balle du joueur touche un ennemi
                     for (auto& e : entities) {
                         if (auto enemy = dynamic_cast<Enemy*>(e.get())) {
                             if (enemy->active && enemy->isColliding(b->x, b->y)) {
@@ -215,9 +181,6 @@ public:
                                 score += 100;
                             }
                         }
-                    }
-                    // Collision : balle du joueur touche une barrière
-                    for (auto& e : entities) {
                         if (auto barrier = dynamic_cast<Barrier*>(e.get())) {
                             if (barrier->active && barrier->isColliding(b->x, b->y)) {
                                 b->active = false;
@@ -227,13 +190,12 @@ public:
                             }
                         }
                     }
-                } else {
-                    // Collision : balle ennemie touche le joueur
-                    if (player->active && player->isColliding(b->x, b->y)) {
+                }
+                else {
+                    if (playerPtr->active && playerPtr->isColliding(b->x, b->y)) {
                         b->active = false;
-                        player->loseLife();
+                        playerPtr->loseLife();
                     }
-                    // Collision : balle ennemie touche une barrière
                     for (auto& e : entities) {
                         if (auto barrier = dynamic_cast<Barrier*>(e.get())) {
                             if (barrier->active && barrier->isColliding(b->x, b->y)) {
@@ -250,61 +212,42 @@ public:
     }
 
     void cleanupEntities() {
-        // Supprime les entités désactivées
         entities.erase(
             remove_if(entities.begin(), entities.end(),
-                [](const unique_ptr<Entity>& e) { return !e->active; }
+                [this](const unique_ptr<Entity>& e) {
+                    return !e->active && e.get() != playerPtr;
+                }
             ),
             entities.end()
         );
     }
 
-    void clearBuffer() {
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                buffer[y][x] = ' ';
-            }
-        }
-    }
-
-    void drawToBuffer() {
-        // Dessine le joueur dans le buffer
-        if (player->active && player->y >= 0 && player->y < HEIGHT &&
-            player->x >= 0 && player->x < WIDTH)
-            buffer[player->y][player->x] = player->symbol;
-
-        // Dessine les autres entités
-        for (auto& e : entities) {
-            if (e->active && e->y >= 0 && e->y < HEIGHT &&
-                e->x >= 0 && e->x < WIDTH)
-                buffer[e->y][e->x] = e->symbol;
-        }
-    }
-
     void render() {
-        // Repositionne le curseur en haut à gauche pour le double-buffering
-        COORD cursorPosition;
-        cursorPosition.X = 0;
-        cursorPosition.Y = 0;
+        // Move cursor to top-left
+        COORD cursorPosition = { 0, 0 };
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPosition);
 
-        // Dessine la bordure supérieure
-        for (int i = 0; i < WIDTH + 2; i++) cout << '#';
-        cout << "\n";
+        // Draw top border
+        cout << '#' << string(WIDTH, '#') << "#\n";
 
-        // Dessine le contenu du buffer avec des bordures latérales
+        // Draw each row
         for (int y = 0; y < HEIGHT; y++) {
             cout << '#';
             for (int x = 0; x < WIDTH; x++) {
-                cout << buffer[y][x];
+                char cell = ' ';
+                for (auto& e : entities) {
+                    if (e->active && e->x == x && e->y == y) {
+                        cell = e->symbol;
+                    }
+                }
+                cout << cell;
             }
             cout << "#\n";
         }
 
-        // Dessine la bordure inférieure, le score et le nombre de vies restantes
-        for (int i = 0; i < WIDTH + 2; i++) cout << '#';
-        cout << "\n";
-        cout << "Score: " << score << "   Lives: " << player->lives << "\n";
+        // Draw bottom border and score
+        cout << '#' << string(WIDTH, '#') << "#\n";
+        cout << "Score: " << score << "   Lives: " << playerPtr->lives << "\n";
     }
 
     void hideCursor() {
@@ -324,15 +267,12 @@ public:
     void run() {
         hideCursor();
         while (!gameOver) {
-            clearBuffer();
-            updateGrid();
-            drawToBuffer();
             render();
             handleInput();
             updateEntities();
-            Sleep(1);
+            Sleep(50);
 
-            // Si un ennemi atteint presque le bas de l'écran, on termine le jeu.
+            // Check if enemies reached the bottom
             for (auto& e : entities) {
                 if (auto enemy = dynamic_cast<Enemy*>(e.get())) {
                     if (enemy->y >= HEIGHT - 2) {
@@ -341,8 +281,8 @@ public:
                     }
                 }
             }
-            // Si le joueur a perdu toutes ses vies, on termine le jeu.
-            if (!player->active)
+
+            if (!playerPtr->active)
                 gameOver = true;
         }
         showCursor();
