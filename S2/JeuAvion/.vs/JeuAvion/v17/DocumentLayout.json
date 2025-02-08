@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Sim\u00E9on\\Documents\\Ecole\\Uni\\GitJeuS2\\Projet_Jeu_S2\\S2\\JeuAvion\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{5A7A09CF-ACB1-4603-B7B0-A742663D05EB}|JeuAvion\\JeuAvion.vcxproj|C:\\Users\\Sim\u00E9on\\Documents\\Ecole\\Uni\\GitJeuS2\\Projet_Jeu_S2\\S2\\JeuAvion\\JeuAvion\\JeuAvion.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{5A7A09CF-ACB1-4603-B7B0-A742663D05EB}|JeuAvion\\JeuAvion.vcxproj|solutionrelative:JeuAvion\\JeuAvion.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "JeuAvion.cpp",
+              "DocumentMoniker": "C:\\Users\\Sim\u00E9on\\Documents\\Ecole\\Uni\\GitJeuS2\\Projet_Jeu_S2\\S2\\JeuAvion\\JeuAvion\\JeuAvion.cpp",
+              "RelativeDocumentMoniker": "JeuAvion\\JeuAvion.cpp",
+              "ToolTip": "C:\\Users\\Sim\u00E9on\\Documents\\Ecole\\Uni\\GitJeuS2\\Projet_Jeu_S2\\S2\\JeuAvion\\JeuAvion\\JeuAvion.cpp",
+              "RelativeToolTip": "JeuAvion\\JeuAvion.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-02-08T17:16:52.648Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
