@@ -19,6 +19,8 @@ void Interface :: gererInput()
     if (_kbhit()) {
         int key = _getch();
 		//cout << key << endl;
+		joueur->ancienX = joueur->posX;
+		joueur->ancienY = joueur->posY;
 
         switch (key) {
         case 75:    //gauche
@@ -49,35 +51,54 @@ void Interface :: gererInput()
 	
 }
 
-void Interface :: updateAffichage()
+void Interface::updatePosEntites()
 {
-    // Efface l'écran (optionnel si on veut éviter un scintillement)
-    //system("cls");
+	for (auto& e : listEntites) {
+		e->update();
+	}
+}
 
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+void Interface::updateAffichage()
+{
+    wchar_t buffer[HEIGHT + 3][WIDTH + 2];
 
-    // Afficher les bordures
-    COORD pos = { 0, 0 };
-    SetConsoleCursorPosition(hConsole, pos);
-    cout << '#' << string(WIDTH, '#') << "#\n";
+    // Remplir le tampon avec des espaces (effacer l'écran)
+    for (int y = 0; y < HEIGHT + 3; y++) {
+        for (int x = 0; x < WIDTH + 2; x++) {
+            buffer[y][x] = L' ';
+        }
+    }
 
-    // Afficher les entités directement à leur position
+    // Mettre à jour les bordures
+    for (int x = 0; x < WIDTH + 2; x++) {
+        buffer[0][x] = L'#';
+        buffer[HEIGHT + 1][x] = L'#';
+    }
+    for (int y = 1; y <= HEIGHT; y++) {
+        buffer[y][0] = L'#';
+        buffer[y][WIDTH + 1] = L'#';
+    }
+
+    // Mettre à jour les entités vivantes
     for (auto& e : listEntites) {
         if (e->enVie) {
-            pos = { static_cast<SHORT>(e->posX + 1), static_cast<SHORT>(e->posY + 1) };
-            SetConsoleCursorPosition(hConsole, pos);
-            cout << e->symbole;
+            buffer[e->posY + 1][e->posX + 1] = e->symbole;  // +1 pour les bordures
         }
     }
 
     // Afficher les bordures du bas et le score
-    pos = {0, static_cast<SHORT>(HEIGHT + 1)};
-    SetConsoleCursorPosition(hConsole, pos);
-    cout << '#' << string(WIDTH, '#') << "#\n";
+    wstring scoreText = L"Score: " + to_wstring(score) + L"   Lives: " + to_wstring(joueur->nbVies);
+    for (size_t i = 0; i < scoreText.size(); i++) {
+        buffer[HEIGHT + 2][i] = scoreText[i];
+    }
 
-    pos = { 0, static_cast<SHORT>(HEIGHT + 2) };
-    SetConsoleCursorPosition(hConsole, pos);
-    cout << "Score: " << score << "   Lives: " << joueur->nbVies << "\n"; 
+    // Afficher le tampon à la console
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD bufferSize = { WIDTH + 2, HEIGHT + 3 };
+    COORD bufferCoord = { 0, 0 };
+    SMALL_RECT writeRegion = { 0, 0, WIDTH + 1, HEIGHT + 2 };
+    DWORD charsWritten;
+    WriteConsoleOutputCharacterW(hConsole, &buffer[0][0], (WIDTH + 2) * (HEIGHT + 3), bufferCoord, &charsWritten);
 }
 
 void Interface :: gererCollisions()
@@ -106,16 +127,37 @@ void Interface:: showCursor() {
 
 void Interface :: executionJeu()
 {
-    hideCursor();
+    
     while(!gameOver)
     {
+		hideCursor();
         gererInput();
+		updatePosEntites();
         updateAffichage();
         gererCollisions();
         enleverEntites();
-        Sleep(50);
+        Sleep(30);
         //probablement autre chose
     }
 
     showCursor();
 }
+
+
+void setConsoleSize() 
+{
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hConsole == INVALID_HANDLE_VALUE) {
+        std::cerr << "Error getting console handle" << std::endl;
+        return;
+    }
+
+    // Set the buffer size first
+    COORD bufferSize = { WIDTH, HEIGHT };
+    SetConsoleScreenBufferSize(hConsole, bufferSize);
+
+    // Then set the window size
+    SMALL_RECT windowSize = { 0, 0, WIDTH - 1, HEIGHT - 1 };
+    SetConsoleWindowInfo(hConsole, TRUE, &windowSize);
+}
+

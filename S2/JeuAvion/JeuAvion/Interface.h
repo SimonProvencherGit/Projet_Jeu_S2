@@ -8,9 +8,12 @@
 #include <ctime>    //pour donner point de depart aleatoire a srand() pour la generation de nombres aleatoires
 #include <memory>  //pour unique_ptr 
 #include <conio.h>  //pour _kbhit()
+#include <string>
 
-const int WIDTH = 50;
-const int HEIGHT = 20;
+const int WIDTH = 60;
+const int HEIGHT = 50;
+
+void setConsoleSize();
 
 class Interface 
 {
@@ -27,6 +30,7 @@ class Interface
     Interface();
     ~Interface();
     void gererInput();
+	void updatePosEntites();
     void updateAffichage();
     void gererCollisions();
     void enleverEntites();

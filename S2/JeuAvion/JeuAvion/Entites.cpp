@@ -4,6 +4,7 @@ Entite::Entite(int x, int y, char symb)
 {
     posX = x;
     posY = y;
+
     symbole = symb;
     enVie = true;
 }

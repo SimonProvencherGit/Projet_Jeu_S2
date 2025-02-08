@@ -12,6 +12,7 @@ class Entite {
 
     public:
     int posX, posY;
+    int ancienX, ancienY;
     bool enVie;
     char symbole;
 	int nbVies;
