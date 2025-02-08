@@ -8,7 +8,10 @@ Entite::Entite(int x, int y, char symb)
     enVie = true;
 }
 
-void Entite::update() {}
+void Entite::update() 
+{
+
+}
 
 bool Entite::enCollision(int px, int py) 
 {
@@ -31,6 +34,10 @@ Joueur::Joueur(int x, int y) : Entite(x, y,'^')
 
 Joueur::~Joueur() {}
 
+void Joueur::update()
+{
+}
+
 void Joueur::perdVie() 
 {
     nbVies--;
@@ -49,6 +56,7 @@ Ennemi::Ennemi(int x, int y) : Entite(x, y,'X')
     vitesse = 1;
     vitesseAttk = 1;
     nbVies = 2;
+	enemyMoveTimer = 0;
 }
 
 Ennemi::~Ennemi() {}
@@ -59,6 +67,11 @@ void Ennemi::perdVie()
     if (nbVies <= 0) {
         enVie = false;
     }
+}
+
+void Ennemi::update()
+{
+
 }
 
 
