@@ -59,7 +59,7 @@ class Bullet : public Entite {
 
     public:
     Bullet(int x, int y, bool isPlayerBullet);
-    void update() override;   //gere le deplacement de la balle dependant de qui l'a tire
+    virtual void update() = 0;   //gere le deplacement de la balle dependant de qui l'a tire
 };
 
 class Obstacle : public Entite{
@@ -69,6 +69,21 @@ class Obstacle : public Entite{
     public:
     Obstacle(int x, int y, int longueur, int larg, int vie);     
     void update() override;    //met a jour la vie de l'obstacle
+};
+
+class BasicEnnemi : public Ennemi {
+    public:
+    int direction;
+    BasicEnnemi(int x, int y);
+    ~BasicEnnemi();
+    void update() override;    //gere le deplacement de l'ennemi
+    void shoot();
+};
+
+class BasicEnnemiBullet : public Bullet {
+    public:
+    BasicEnnemiBullet(int x, int y);
+    void update() override;    //gere le deplacement de la balle
 };
 
 #endif 

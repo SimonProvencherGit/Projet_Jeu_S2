@@ -1,5 +1,9 @@
 #include "Entites.h"
 
+#include <memory>
+
+#include "Interface.h"
+
 Entite::Entite(int x, int y, char symb) 
 {
     posX = x;
@@ -23,6 +27,7 @@ bool Entite::enCollision(int px, int py)
 
 
 //******************************** classe joueur ***********************************//
+
 
 Joueur::Joueur(int x, int y) : Entite(x, y,'^')
 {
@@ -82,15 +87,6 @@ Bullet::Bullet(int x, int y, bool isPlayerBullet) : Entite(x, y,'|')
 
 }
 
-void Bullet::update() 
-{
-    if (tirAllie) 
-        posY--;
-    else 
-        posY++;
-    
-}
-
 
 //******************************** classe obstacle ***********************************//
 
@@ -105,6 +101,55 @@ void Obstacle::update()
 {
     if (nbVies <= 0) 
         enVie = false;
+}
+
+
+
+//******************************** classe BasicEnnemi ***********************************//
+BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y) {
+    direction = rand() % 2; ; // 0 A gauche, 1 a droite
+}
+
+void BasicEnnemi::update() {
+    static int updateCounter = 0;
+    static int shootCounter = 0;
+
+    if (posX <= 0 || posX >= WIDTH - 1) {
+        direction = 1 - direction; // Change de Direction
+    }
+    posX += (direction == 0) ? -1 : 1; // Bouger a gauche ou a droite
+
+    updateCounter++;
+    if (updateCounter >= 5) {
+        posY++;
+        updateCounter = 0;
+    }
+
+    if (posY >= HEIGHT) {
+        enVie = false;
+    }
+
+    shootCounter++;
+    if (shootCounter >= 4) {
+        shoot();
+        shootCounter = 0;
+    }
+}
+
+void BasicEnnemi::shoot() {
+    listEntites.emplace_back(std::make_unique<BasicEnnemiBullet>(posX, posY));
+
+}
+//******************************** classe BasicEnnemiBullet ***********************************//
+BasicEnnemiBullet::BasicEnnemiBullet(int x, int y) : Bullet(x, y, false) {
+    symbole = '|';
+}
+
+void BasicEnnemiBullet::update() {
+    posY++;
+    if (posY >= HEIGHT) {
+        enVie = false;
+    }
 }
 
 
