@@ -1,0 +1,3 @@
+C:/Users/amran/CLionProjects/Projet_Jeu/S2/JeuAvion/JeuAvion/cmake-build-debug/CMakeFiles/JeuAvion.dir
+C:/Users/amran/CLionProjects/Projet_Jeu/S2/JeuAvion/JeuAvion/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/amran/CLionProjects/Projet_Jeu/S2/JeuAvion/JeuAvion/cmake-build-debug/CMakeFiles/rebuild_cache.dir
