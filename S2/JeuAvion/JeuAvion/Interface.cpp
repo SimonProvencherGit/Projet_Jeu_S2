@@ -4,8 +4,8 @@ Interface :: Interface()
 {
     score = 0;
     gameOver = false;
-    enemyDirection = 1;
-    enemyMoveTimer = 0;
+    //enemyDirection = 1;
+    enemySpawnTimer = 0;
 
     listEntites.emplace_back(make_unique<Joueur>(WIDTH / 2, HEIGHT - 1));
     joueur = static_cast<Joueur*>(listEntites.back().get());
@@ -16,45 +16,77 @@ Interface :: ~Interface() {}
 
 void Interface :: gererInput()
 {
-    if (_kbhit()) {
-        int key = _getch();
-		//cout << key << endl;
-		joueur->ancienX = joueur->posX;
-		joueur->ancienY = joueur->posY;
+   // joueur->ancienX = joueur->posX;
+   // joueur->ancienY = joueur->posY;
 
-        switch (key) {
-        case 75:    //gauche
-            if (joueur->posX > 0) 
-                joueur->posX--;
-            break;
-        case 77:    //droite
-            if (joueur->posX < WIDTH - 1) 
-                joueur->posX++;
-            break;
-        case 72:   //haut
-            if (joueur->posY > HEIGHT/2) 
-                joueur->posY--;        //pos y -- pour decendre car le tableau commence du haut vers le bas
-            break;
-        case 80:    //bas
-            if (joueur->posY < HEIGHT -1)
-                joueur->posY++;        
-            break;
-        case 32:    //espace
-			listEntites.emplace_back(make_unique<Bullet>(joueur->posX, joueur->posY - 1, true));        //ajoute une balle tiree par le joueur dans le tableau d'entites 
-            break;
-        case 'q':
-            gameOver = true;
-            break;
+    if (GetAsyncKeyState(VK_LEFT) < 0) 
+        if (joueur->posX > 0) 
+            joueur->posX--;
+    
+    if (GetAsyncKeyState(VK_RIGHT) < 0) 
+        if (joueur->posX < WIDTH - 1) 
+            joueur->posX++;
+    
+    if (GetAsyncKeyState(VK_UP) < 0) 
+        if (joueur->posY > HEIGHT / 2) 
+            joueur->posY--;
+   
+    if (GetAsyncKeyState(VK_DOWN) < 0) 
+        if (joueur->posY < HEIGHT - 1) 
+            joueur->posY++;
+    if (GetAsyncKeyState(VK_SPACE) < 0) {
+        if (joueur->shootTimer <= 0) 
+        {
+            listEntites.emplace_back(make_unique<BasicBullet>(joueur->posX, joueur->posY - 1, true));
+            joueur->shootTimer = joueur->shootCooldown;
         }
-        //cout << "posX: " << joueur->posX << " posY: " << joueur->posY << endl;
     }
-	
+    if (GetAsyncKeyState('Q') < 0) {
+        gameOver = true;
+    }
 }
 
-void Interface::updatePosEntites()
+//determine quand le enenmi spawns a des positions random en haut du tableau
+void Interface::enemySpawn(int nbEnnemi)
 {
+	int posRand = rand() % WIDTH-1                    ;
+    int anciennePos;
+	enemySpawnTimer++;
+	if (enemySpawnTimer >= 70) {
+		
+        for (int i = 0; i < nbEnnemi; i++)
+        {
+            anciennePos = posRand;
+            posRand = rand() % WIDTH-1;
+            while (posRand == anciennePos)
+                posRand = rand() % WIDTH-1;
+
+            listEntites.emplace_back(make_unique<BasicEnnemi>(posRand, 0));     //spawn basic enemi
+        }
+
+		//spawn un enemi a une differente place que le dernier 
+
+		enemySpawnTimer = 0;
+	}
+}
+
+void Interface::updateEntites()
+{
+    vector<unique_ptr<Entite>> bufferBullets;
+
 	for (auto& e : listEntites) {
-		e->update();
+        if (e->enVie)
+        {
+            e->update();
+
+            // a toute les 10 frames les ennemis tirent
+            if (e->allieOuEnnemi == false && e->symbole != '|' && e->moveTimer % e->shootCooldown  == 0) {
+				bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX, e->posY + 1, false));          //on met les bullets dans un buffer pour eviter de les ajouter a la liste pendant qu'on la parcourt
+            }
+        }
+	}
+	for (auto& bullet : bufferBullets) {
+		listEntites.push_back(move(bullet));
 	}
 }
 
@@ -80,10 +112,10 @@ void Interface::updateAffichage()
     }
 
     // Mettre à jour les entités vivantes
-    for (auto& e : listEntites) {
-        if (e->enVie) {
+    for (auto& e : listEntites) 
+    {
+        if (e->enVie) 
             buffer[e->posY + 1][e->posX + 1] = e->symbole;  // +1 pour les bordures
-        }
     }
 
     // Afficher les bordures du bas et le score
@@ -92,23 +124,60 @@ void Interface::updateAffichage()
         buffer[HEIGHT + 2][i] = scoreText[i];
     }
 
-    // Afficher le tampon à la console
+	// on affiche chaque ligne du buffer
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD bufferSize = { WIDTH + 2, HEIGHT + 3 };
-    COORD bufferCoord = { 0, 0 };
-    SMALL_RECT writeRegion = { 0, 0, WIDTH + 1, HEIGHT + 2 };
-    DWORD charsWritten;
-    WriteConsoleOutputCharacterW(hConsole, &buffer[0][0], (WIDTH + 2) * (HEIGHT + 3), bufferCoord, &charsWritten);
+    for (int y = 0; y < HEIGHT + 3; y++) 
+    {
+        COORD bufferCoord = { 0, static_cast<SHORT>(y) };
+        DWORD charsWritten;
+        // Write the entire row, including borders and trailing spaces
+        WriteConsoleOutputCharacterW(hConsole, buffer[y], WIDTH + 2, bufferCoord, &charsWritten);
+    }
 }
 
 void Interface :: gererCollisions()
 {
-    
+	for (auto& e : listEntites)
+	{
+		if (e->enVie)
+		{
+		    //on verifie si un enemi ou un bullet est entre en collision avec le joueur et verifie que e n'est pas joueur
+            if (e->enCollision(joueur->posX, joueur->posY) && e->symbole != '^')
+            {
+                joueur->perdVie();
+                if (!joueur->enVie)
+                    gameOver = true;
+            }
+            //on verifie si un bullet entre en collision avec un ennemi et si ell est un tir allie
+			else if (e->symbole == '|' && e->allieOuEnnemi)
+			{
+				for (auto& e2 : listEntites)
+				{
+					if (e2->enVie && e2->enCollision(e->posX, e->posY) && e2->symbole != '|')
+					{
+						e2->perdVie();
+						e->enVie = false;
+						if (!e2->enVie)
+						{
+							score += 10;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void Interface :: enleverEntites()
 {
-   
+	for (int i = 0; i < listEntites.size(); i++)
+	{
+		if (!listEntites[i]->enVie)
+		{
+			listEntites.erase(listEntites.begin() + i);
+			i--;
+		}
+	}
 }
 
 void Interface :: hideCursor() {
@@ -127,16 +196,16 @@ void Interface:: showCursor() {
 
 void Interface :: executionJeu()
 {
-    
+    hideCursor();
     while(!gameOver)
     {
-		hideCursor();
+		enemySpawn(3);
         gererInput();
-		updatePosEntites();
-        updateAffichage();
+		updateEntites();
         gererCollisions();
         enleverEntites();
-        Sleep(30);
+        updateAffichage();
+        Sleep(25);
         //probablement autre chose
     }
 
@@ -157,7 +226,7 @@ void setConsoleSize()
     SetConsoleScreenBufferSize(hConsole, bufferSize);
 
     // Then set the window size
-    SMALL_RECT windowSize = { 0, 0, WIDTH - 1, HEIGHT - 1 };
+    SMALL_RECT windowSize = { 0, 0, WIDTH+3, HEIGHT+3};
     SetConsoleWindowInfo(hConsole, TRUE, &windowSize);
 }
 

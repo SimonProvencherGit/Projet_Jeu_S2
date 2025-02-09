@@ -10,9 +10,6 @@
 #include <conio.h>  //pour _kbhit()
 #include <string>
 
-const int WIDTH = 60;
-const int HEIGHT = 50;
-
 void setConsoleSize();
 
 class Interface 
@@ -23,14 +20,14 @@ class Interface
 
     int score;
     bool gameOver;
-    int enemyDirection;
-    int enemyMoveTimer;
+    int enemySpawnTimer;
 
     public:
     Interface();
     ~Interface();
     void gererInput();
-	void updatePosEntites();
+	void enemySpawn(int nbEnnemi);
+	void updateEntites();
     void updateAffichage();
     void gererCollisions();
     void enleverEntites();

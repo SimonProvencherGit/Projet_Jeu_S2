@@ -6,7 +6,7 @@
 
 int main() {
     printf("Hello World\n");
-    //setConsoleSize();
+    setConsoleSize();
     Interface game;
     game.executionJeu();
 
