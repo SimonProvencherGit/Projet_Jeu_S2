@@ -54,8 +54,7 @@
               "RelativeToolTip": "JeuAvion\\Interface.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAADYAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-02-08T17:26:49.504Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-08T17:26:49.504Z"
             },
             {
               "$type": "Document",
@@ -67,8 +66,7 @@
               "RelativeToolTip": "JeuAvion\\Interface.h",
               "ViewState": "AgIAAAwAAAAAAAAAAAAkwBsAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-02-08T17:26:56.434Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-08T17:26:56.434Z"
             },
             {
               "$type": "Document",
@@ -78,7 +76,7 @@
               "RelativeDocumentMoniker": "JeuAvion\\Entites.cpp",
               "ToolTip": "C:\\Users\\Sim\u00E9on\\Documents\\Ecole\\Uni\\GitJeuS2\\Projet_Jeu_S2\\S2\\JeuAvion\\JeuAvion\\Entites.cpp",
               "RelativeToolTip": "JeuAvion\\Entites.cpp",
-              "ViewState": "AgIAABsAAAAAAAAAAAAIwCcAAAAVAAAAAAAAAA==",
+              "ViewState": "AgIAABsAAAAAAAAAAAAIwCcAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-02-08T17:26:48.196Z",
               "EditorCaption": ""
@@ -93,8 +91,7 @@
               "RelativeToolTip": "JeuAvion\\Entites.h",
               "ViewState": "AgIAAAYAAAAAAAAAAAAAABMAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-02-08T17:26:53.869Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-02-08T17:26:53.869Z"
             }
           ]
         }
