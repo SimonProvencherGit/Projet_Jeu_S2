@@ -30,7 +30,8 @@ void Interface :: gererInput()
     if (GetAsyncKeyState(VK_DOWN) < 0 || GetAsyncKeyState('S') < 0)
         if (joueur->posY < HEIGHT - 1) 
             joueur->posY++;
-    if (GetAsyncKeyState(VK_SPACE) < 0) {
+    if (GetAsyncKeyState(VK_SPACE) < 0) 
+    {
 		if (joueur->shootTimer == 0)    //on tire si on peut
         {
             listEntites.emplace_back(make_unique<BasicBullet>(joueur->posX + joueur->largeur/2, joueur->posY - 1, true));
@@ -43,28 +44,102 @@ void Interface :: gererInput()
 }
 
 
-//fait spawn x dn d'ennemis
-void Interface::enemySpawn(int nbEnnemi)
+//fait spawn x nb d'ennemis
+void Interface::enemySpawn(int nbEnnemi, typeEnnemis ennemiVoulu)
 {
-	int posRand = (rand() % (WIDTH)) + 1;
+    int posRand = (rand() % (WIDTH)) + 1;     //on genere une position aleatoire pour l'ennemi + 1 pour ne pas etre sur la bordure
 	int anciennePos;	//on garde en memoire la position de l'ennemi precedent pour eviter de le spawn a la meme position
-	enemySpawnTimer++;
+	
+   
+    for (int i = 0; i < nbEnnemi; i++)  //on fait spawn un nombre d'ennemis egal a nbEnnemi
+    {
+		anciennePos = posRand;
 
-	if (enemySpawnTimer >= 70)          //on fait spawn une vague d'ennemis a toutes les 70 frames
-    {      
-		for (int i = 0; i < nbEnnemi; i++)  //on fait spawn un nombre d'ennemis egal a nbEnnemi
+        switch (ennemiVoulu)
         {
-            anciennePos = posRand;
-            posRand = 1 + rand() % (WIDTH-1);
-			while (posRand == anciennePos)	  //on s'assure que le nouvel ennemi n'est pas a la meme position que le dernier
-                posRand = rand() % (WIDTH-1); 
-
-			listEntites.emplace_back(make_unique<BasicEnnemi>(posRand, 0));     //spawn basic enemi on pourais mettre d'autre types d'ennemis
+        case BASIC:
+            listEntites.emplace_back(make_unique<BasicEnnemi>(posRand, 0));
+			posRand = (rand() % (WIDTH - listEntites.back()->largeur -1)) + 1;     //on genere une position aleatoire pour l'ennemi + 1 pour ne pas etre sur la bordure
+            while (posRand == anciennePos)	  //on s'assure que le nouvel ennemi n'est pas a la meme position que le dernier
+            {
+				posRand = (rand() % (WIDTH - listEntites.back()->largeur - 1)) + 1;
+            }
+            break;
+        case RAPIDE:
+            //listEntites.emplace_back(make_unique<RapideEnnemi>(posRand, 0));
+            break;
+        case TANK:
+            //listEntites.emplace_back(make_unique<TankEnnemi>(posRand, 0));
+            break;
+        case ARTILLEUR:
+            //listEntites.emplace_back(make_unique<ArtilleurEnnemi>(posRand, 0));
+            break;
+        case DIVEBOMBER:
+            //listEntites.emplace_back(make_unique<DiveBomberEnnemi>(posRand, 0));
+            break;
         }
-		enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
-	}
+    }
+
+    /*
+	for (int i = 0; i < nbEnnemi; i++)  //on fait spawn un nombre d'ennemis egal a nbEnnemi
+    {
+        anciennePos = posRand;
+        posRand = 1 + rand() % (WIDTH-1);
+		while (posRand == anciennePos)	  //on s'assure que le nouvel ennemi n'est pas a la meme position que le dernier
+            posRand = rand() % (WIDTH-1); 
+
+        switch (ennemiVoulu)
+        {
+        case BASIC:
+            listEntites.emplace_back(make_unique<BasicEnnemi>(posRand, 0));    
+            break;
+        case RAPIDE:
+            //listEntites.emplace_back(make_unique<RapideEnnemi>(posRand, 0));
+            break;
+        case TANK:
+            //listEntites.emplace_back(make_unique<TankEnnemi>(posRand, 0));
+            break;
+        case ARTILLEUR:
+            //listEntites.emplace_back(make_unique<ArtilleurEnnemi>(posRand, 0));
+            break;
+        case DIVEBOMBER:
+            //listEntites.emplace_back(make_unique<DiveBomberEnnemi>(posRand, 0));
+            break;
+        }
+    }*/
 }
 
+
+void Interface::progressionDifficulte()
+{
+    enemySpawnTimer++;
+
+    if (score < 300)
+    {
+
+        if (enemySpawnTimer >= 70)          //on fait spawn une vague d'ennemis a toutes les 70 frames
+        {
+            enemySpawn(3, BASIC);   //on fait spawn 3 ennemis a chaque vague
+            enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
+        }
+    }
+	if (score >= 300 && score < 600)
+	{
+		if (enemySpawnTimer >= 60)          //on fait spawn une vague d'ennemis a toutes les 60 frames
+		{
+			enemySpawn(4, BASIC);   //on fait spawn 4 ennemis a chaque vague
+			enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
+		}
+	}
+	if (score >= 600)
+	{
+		if (enemySpawnTimer >= 40)          //on fait spawn une vague d'ennemis a toutes les 50 frames
+		{
+			enemySpawn(5, BASIC);   //on fait spawn 5 ennemis a chaque vague
+			enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
+		}
+	}
+}
 
 //met a jour les entites a chaque frame
 void Interface::updateEntites()
@@ -227,7 +302,7 @@ void Interface :: executionJeu()
     hideCursor();
     while(!gameOver)
     {
-		enemySpawn(3);
+		progressionDifficulte();
         gererInput();
 		updateEntites();
         gererCollisions();

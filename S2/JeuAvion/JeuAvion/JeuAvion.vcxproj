@@ -131,10 +131,12 @@
     <ClCompile Include="Entites.cpp" />
     <ClCompile Include="Interface.cpp" />
     <ClCompile Include="JeuAvion.cpp" />
+    <ClCompile Include="Music.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entites.h" />
     <ClInclude Include="Interface.h" />
+    <ClInclude Include="Music.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
