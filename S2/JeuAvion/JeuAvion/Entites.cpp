@@ -1,10 +1,12 @@
 #include "Entites.h"
 
-Entite::Entite(int x, int y, char symb) 
+Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 {
 	//donne des valeurs par defaut aux variables qui vont etre redefinies dans les classes enfant
     posX = x;
     posY = y;
+	hauteur = hauteurEntite;
+	largeur = largeurEntite;
     symbole = symb;
     enVie = true;
     collisionJoueur = false;
@@ -18,7 +20,7 @@ Entite::Entite(int x, int y, char symb)
 
 bool Entite::enCollision(int px, int py) 
 {
-	if (px >= posX - 1 && px <= posX + 1 && py == posY)       // on fait une collision si les entites sont a la meme position (+ - 1 pour amelirer la detection)
+	if (px >= posX - 1 && px <= posX + largeur + 1 && py >= posY && py < posY + hauteur)       // on fait une collision si les entites sont a la meme position (+ - 1 pour amelirer la detection)
         return 1;
 
     return 0;
@@ -36,7 +38,7 @@ void Entite::perdVie()
 
 //******************************** classe joueur ***********************************
 
-Joueur::Joueur(int x, int y) : Entite(x, y,'^')
+Joueur::Joueur(int x, int y) : Entite(x, y, '^', 1, 1)  //on set les valeurs par defaut pour le joueur
 {
     nbVies = 3;
     attkDmg = 1;
@@ -58,7 +60,7 @@ void Joueur::update()
 
 //******************************** classe ennemi ***********************************
 
-Ennemi::Ennemi(int x, int y) : Entite(x, y,'X') 
+Ennemi::Ennemi(int x, int y) : Entite(x, y, 'X', 1, 1) 
 {
 	//set des valeurs par defaut pour les ennemis a etre redefinies dans les classes enfant
     attkDmg = 1;
@@ -73,19 +75,22 @@ Ennemi::Ennemi(int x, int y) : Entite(x, y,'X')
     typeEnnemi = BASIC;
 }
 
-BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y){
+BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y)
+{
     direction = rand() % 2; ; // 0 A gauche, 1 a droite
     symbole = 'W';
 	nbVies = 3;
     shootCooldown = 100;   // 100 frames avant de tirer donc plus gros chiffre = tir plus lent
 	typeEnnemi = BASIC;
+    hauteur = 2;
+	largeur = 6;
 }
 
 void BasicEnnemi::update() 
 {
     if (moveTimer % 5 == 0)         //a toute les 5 update on peut bouger en X 
     {
-        if (posX <= 0 || posX >= WIDTH - 1)
+        if (posX <= 0 || posX + largeur >= WIDTH)
             direction = 1 - direction; // Change de Direction
 
         posX += (direction == 0) ? -1 : 1; // Bouger a gauche ou a droite
@@ -106,7 +111,7 @@ void BasicEnnemi::update()
 
 //******************************** classe bullet ***********************************
 
-Bullet::Bullet(int x, int y, bool isPlayerBullet) : Entite(x, y,'|')
+Bullet::Bullet(int x, int y, bool isPlayerBullet) : Entite(x, y,'|', 1, 1)
 {
 	//set des valeurs par defaut pour les bullets a etre redefinies dans les classes enfant
 	nbVies = 1;
@@ -122,6 +127,8 @@ BasicBullet::BasicBullet(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPla
 {
     symbole = '|';
     bulletType = NORMAL;
+	hauteur = 1;
+	largeur = 1;
 }
 
 void BasicBullet::update()
@@ -151,7 +158,7 @@ void BasicBullet::update()
 
 //******************************** classe obstacle ***********************************
 
-Obstacle::Obstacle(int x, int y, int longueur, int larg, int vie) : Entite(x, y,'#')
+Obstacle::Obstacle(int x, int y, int longueur, int larg, int vie) : Entite(x, y,'#', 3, 1)
 {
     nbVies = vie;
 }

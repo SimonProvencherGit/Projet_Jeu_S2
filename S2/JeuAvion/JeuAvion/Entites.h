@@ -21,6 +21,7 @@ class Entite
 
     public:
     int posX, posY;
+	int largeur, hauteur;
     int shootCooldown;
 	int shootTimer;
     bool enVie;
@@ -31,7 +32,7 @@ class Entite
     bool collisionJoueur;
 	typeEntites type;
 
-    Entite(int x, int y, char symb);
+    Entite(int x, int y, char symb, int longueurEntite, int largeurEntite);
     virtual void update() = 0;
 	void perdVie();
     virtual bool enCollision(int px, int py);  // retourne vrai si px et py sont egaux au x et y de l'entite

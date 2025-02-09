@@ -24,7 +24,6 @@ class Interface
 
     public:
     Interface();
-    ~Interface();
     void gererInput();
 	void enemySpawn(int nbEnnemi);
 	void updateEntites();
