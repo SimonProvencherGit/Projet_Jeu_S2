@@ -35,10 +35,11 @@ void Interface :: gererInput()
         if (joueur->posY < HEIGHT - 1) 
             joueur->posY++;
     if (GetAsyncKeyState(VK_SPACE) < 0) {
-        //if (shootCooldown <= 0) {
+        if (joueur->shootTimer <= 0) 
+        {
             listEntites.emplace_back(make_unique<BasicBullet>(joueur->posX, joueur->posY - 1, true));
-            //shootCooldown = SHOOT_COOLDOWN;
-       //}
+            joueur->shootTimer = joueur->shootCooldown;
+        }
     }
     if (GetAsyncKeyState('Q') < 0) {
         gameOver = true;
@@ -48,19 +49,19 @@ void Interface :: gererInput()
 //determine quand le enenmi spawns a des positions random en haut du tableau
 void Interface::enemySpawn(int nbEnnemi)
 {
-	int posRand = rand() % WIDTH;
+	int posRand = rand() % WIDTH-1                    ;
     int anciennePos;
 	enemySpawnTimer++;
-	if (enemySpawnTimer >= 50) {
+	if (enemySpawnTimer >= 70) {
 		
         for (int i = 0; i < nbEnnemi; i++)
         {
             anciennePos = posRand;
-            posRand = rand() % WIDTH;
+            posRand = rand() % WIDTH-1;
             while (posRand == anciennePos)
-                posRand = rand() % WIDTH;
+                posRand = rand() % WIDTH-1;
 
-            listEntites.emplace_back(make_unique<BasicEnnemi>(posRand, 0));
+            listEntites.emplace_back(make_unique<BasicEnnemi>(posRand, 0));     //spawn basic enemi
         }
 
 		//spawn un enemi a une differente place que le dernier 
@@ -69,10 +70,23 @@ void Interface::enemySpawn(int nbEnnemi)
 	}
 }
 
-void Interface::updatePosEntites()
+void Interface::updateEntites()
 {
+    vector<unique_ptr<Entite>> bufferBullets;
+
 	for (auto& e : listEntites) {
-		e->update();
+        if (e->enVie)
+        {
+            e->update();
+
+            // a toute les 10 frames les ennemis tirent
+            if (e->allieOuEnnemi == false && e->symbole != '|' && e->moveTimer % e->shootCooldown  == 0) {
+				bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX, e->posY + 1, false));          //on met les bullets dans un buffer pour eviter de les ajouter a la liste pendant qu'on la parcourt
+            }
+        }
+	}
+	for (auto& bullet : bufferBullets) {
+		listEntites.push_back(move(bullet));
 	}
 }
 
@@ -134,7 +148,22 @@ void Interface :: gererCollisions()
                 if (!joueur->enVie)
                     gameOver = true;
             }
-
+            //on verifie si un bullet entre en collision avec un ennemi et si ell est un tir allie
+			else if (e->symbole == '|' && e->allieOuEnnemi)
+			{
+				for (auto& e2 : listEntites)
+				{
+					if (e2->enVie && e2->enCollision(e->posX, e->posY) && e2->symbole != '|')
+					{
+						e2->perdVie();
+						e->enVie = false;
+						if (!e2->enVie)
+						{
+							score += 10;
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -172,7 +201,7 @@ void Interface :: executionJeu()
     {
 		enemySpawn(3);
         gererInput();
-		updatePosEntites();
+		updateEntites();
         gererCollisions();
         enleverEntites();
         updateAffichage();

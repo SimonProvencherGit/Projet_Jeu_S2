@@ -27,7 +27,7 @@ class Interface
     ~Interface();
     void gererInput();
 	void enemySpawn(int nbEnnemi);
-	void updatePosEntites();
+	void updateEntites();
     void updateAffichage();
     void gererCollisions();
     void enleverEntites();

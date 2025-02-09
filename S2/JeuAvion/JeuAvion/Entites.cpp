@@ -22,6 +22,13 @@ bool Entite::enCollision(int px, int py)
     return 0;
 }
 
+void Entite::perdVie()
+{
+    nbVies--;
+    if (nbVies <= 0)
+        enVie = false;
+
+}
 
 //******************************** classe joueur ***********************************
 
@@ -30,21 +37,16 @@ Joueur::Joueur(int x, int y) : Entite(x, y,'^')
     nbVies = 3;
     attkDmg = 1;
     vitesse = 1;
-    vitesseAttk = 1;
+    shootCooldown = 5;
+	shootTimer = 5;
+	allieOuEnnemi = true;
 }
 
 Joueur::~Joueur() {}
 
 void Joueur::update()
 {
-}
-
-void Joueur::perdVie() 
-{
-    nbVies--;
-    if (nbVies <= 0) 
-        enVie = false;
-    
+	shootTimer--;
 }
 
 
@@ -55,56 +57,41 @@ Ennemi::Ennemi(int x, int y) : Entite(x, y,'X')
     type = 1;
     attkDmg = 1;
     vitesse = 1;
-    vitesseAttk = 1;
-    nbVies = 2;
-	enemyMoveTimer = 0;
+    shootCooldown = 50;
+    nbVies = 3;
+	moveTimer = 0;
+	allieOuEnnemi = false;
 }
 
 Ennemi::~Ennemi() {}
 
-void Ennemi::perdVie() 
-{
-    nbVies--;
-    if (nbVies <= 0) {
-        enVie = false;
-    }
-}
-
 BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y){
     direction = rand() % 2; ; // 0 A gauche, 1 a droite
     symbole = 'W';
+    shootCooldown = 40;   // 40 frames avant de tirer donc plus gros chiffre = tir plus lent
 }
 
 void BasicEnnemi::update() {
-    static int updateCounter = 0;
-    static int shootCounter = 0;
 
-    if (posX <= 0 || posX >= WIDTH - 1) {
-        direction = 1 - direction; // Change de Direction
+    if (moveTimer % 5 == 0) {
+        if (posX <= 0 || posX >= WIDTH - 1)
+            direction = 1 - direction; // Change de Direction
+
+        posX += (direction == 0) ? -1 : 1; // Bouger a gauche ou a droite
     }
-    posX += (direction == 0) ? -1 : 1; // Bouger a gauche ou a droite
 
-    updateCounter++;
-    if (updateCounter >= 5) {
+    if (moveTimer %10 == 0) 
         posY++;
-        updateCounter = 0;
-    }
 
-    if (posY >= HEIGHT) {
+	if (moveTimer >= 100)
+		moveTimer = 0;
+
+    if (posY >= HEIGHT) 
         enVie = false;
-    }
-
-    /*shootCounter++;
-    if (shootCounter >= 4) {
-        shoot();
-        shootCounter = 0;
-    }*/
+    
+    moveTimer++;
 }
 
-void BasicEnnemi::shoot()
-{
-	//listEntites.emplace_back(std::make_unique<BasicEnnemiBullet>(posX, posY));
-}
 
 //******************************** classe bullet ***********************************
 
@@ -116,12 +103,12 @@ Bullet::Bullet(int x, int y, bool isPlayerBullet) : Entite(x, y,'|')
 BasicBullet::BasicBullet(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
 {
     symbole = '|';
-    tirAllie = isPlayerBullet;
+    allieOuEnnemi = isPlayerBullet;
 }
 
 void BasicBullet::update()
 {
-    if (tirAllie)
+    if (allieOuEnnemi)
     {
         posY--;
         if (posY < 0)
