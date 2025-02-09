@@ -83,14 +83,14 @@ BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y)
     shootCooldown = 100;   // 100 frames avant de tirer donc plus gros chiffre = tir plus lent
 	typeEnnemi = BASIC;
     hauteur = 2;
-	largeur = 3;
+	largeur = 6;
 }
 
 void BasicEnnemi::update() 
 {
     if (moveTimer % 5 == 0)         //a toute les 5 update on peut bouger en X 
     {
-        if (posX <= 0 || posX >= WIDTH - 1)
+        if (posX <= 0 || posX + largeur >= WIDTH)
             direction = 1 - direction; // Change de Direction
 
         posX += (direction == 0) ? -1 : 1; // Bouger a gauche ou a droite

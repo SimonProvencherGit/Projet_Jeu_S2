@@ -24,7 +24,7 @@ void Interface :: gererInput()
             joueur->posX++;
     
     if (GetAsyncKeyState(VK_UP) < 0) 
-        if (joueur->posY > HEIGHT / 2) 
+        if (joueur->posY > HEIGHT / 3)      //le joueur a acces au 2/3 de l'ecran
             joueur->posY--;
    
     if (GetAsyncKeyState(VK_DOWN) < 0) 
@@ -46,8 +46,8 @@ void Interface :: gererInput()
 //fait spawn x dn d'ennemis
 void Interface::enemySpawn(int nbEnnemi)
 {
-	int posRand = rand() % WIDTH-1;
-    int anciennePos;
+	int posRand = (rand() % (WIDTH)) + 1;
+	int anciennePos;	//on garde en memoire la position de l'ennemi precedent pour eviter de le spawn a la meme position
 	enemySpawnTimer++;
 
 	if (enemySpawnTimer >= 70)          //on fait spawn une vague d'ennemis a toutes les 70 frames
@@ -55,9 +55,9 @@ void Interface::enemySpawn(int nbEnnemi)
 		for (int i = 0; i < nbEnnemi; i++)  //on fait spawn un nombre d'ennemis egal a nbEnnemi
         {
             anciennePos = posRand;
-            posRand = 1 + rand() % WIDTH-1;
+            posRand = 1 + rand() % (WIDTH-1);
 			while (posRand == anciennePos)	  //on s'assure que le nouvel ennemi n'est pas a la meme position que le dernier
-                posRand = rand() % WIDTH-1; 
+                posRand = rand() % (WIDTH-1); 
 
 			listEntites.emplace_back(make_unique<BasicEnnemi>(posRand, 0));     //spawn basic enemi on pourais mettre d'autre types d'ennemis
         }
@@ -79,8 +79,8 @@ void Interface::updateEntites()
 
             // a toute les 10 frames les ennemis tirent
             if (e->type == ENNEMI && e->moveTimer % e->shootCooldown  == 0)    //on verifie si c'est un ennemi et si sont compteur pour tirer est a 0
-				bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX, e->posY + 1, false));          //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour 
-		}                                                                                                  // eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle
+				bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX + e->largeur/2, e->posY + 1, false));           //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour 
+		}                                                                                                                   // eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle
 	}
 	for (auto& bullet : bufferBullets) 
 		listEntites.push_back(move(bullet));	//on ajoute les bullets du buffer a la liste d'entites
