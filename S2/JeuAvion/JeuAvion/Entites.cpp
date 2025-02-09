@@ -80,7 +80,7 @@ BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y)
     direction = rand() % 2; ; // 0 A gauche, 1 a droite
     symbole = 'W';
 	nbVies = 3;
-    shootCooldown = 100;   // 100 frames avant de tirer donc plus gros chiffre = tir plus lent
+    shootCooldown = 100;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
 	typeEnnemi = BASIC;
     hauteur = 2;
 	largeur = 4;
@@ -90,7 +90,7 @@ void BasicEnnemi::update()
 {
     if (moveTimer % 5 == 0)         //a toute les 5 update on peut bouger en X 
     {
-        if (posX <= 0 || posX + largeur >= WIDTH)
+        if (posX <= 1 || posX + largeur >= WIDTH-1)
             direction = 1 - direction; // Change de Direction
 
         posX += (direction == 0) ? -1 : 1; // Bouger a gauche ou a droite

@@ -25,7 +25,8 @@ class Interface
     public:
     Interface();
     void gererInput();
-	void enemySpawn(int nbEnnemi);
+	void progressionDifficulte();
+	void enemySpawn(int nbEnnemi, typeEnnemis enemiVoulu);
 	void updateEntites();
     void updateAffichage();
     void gererCollisions();
