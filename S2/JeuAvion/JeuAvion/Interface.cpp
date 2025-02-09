@@ -15,25 +15,25 @@ Interface :: Interface()
 //gere les inputs du joueur
 void Interface :: gererInput()
 {
-    if (GetAsyncKeyState(VK_LEFT) < 0)      
+	if (GetAsyncKeyState(VK_LEFT) < 0 || GetAsyncKeyState('A') < 0)   //on verifie si la fleche gauche ou D est pressee
         if (joueur->posX > 0) 
             joueur->posX--;
     
-    if (GetAsyncKeyState(VK_RIGHT) < 0) 
+    if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState('D') < 0)
         if (joueur->posX < WIDTH - 1) 
             joueur->posX++;
     
-    if (GetAsyncKeyState(VK_UP) < 0) 
+    if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState('W') < 0)
         if (joueur->posY > HEIGHT / 3)      //le joueur a acces au 2/3 de l'ecran
             joueur->posY--;
    
-    if (GetAsyncKeyState(VK_DOWN) < 0) 
+    if (GetAsyncKeyState(VK_DOWN) < 0 || GetAsyncKeyState('S') < 0)
         if (joueur->posY < HEIGHT - 1) 
             joueur->posY++;
     if (GetAsyncKeyState(VK_SPACE) < 0) {
 		if (joueur->shootTimer == 0)    //on tire si on peut
         {
-            listEntites.emplace_back(make_unique<BasicBullet>(joueur->posX, joueur->posY - 1, true));
+            listEntites.emplace_back(make_unique<BasicBullet>(joueur->posX + joueur->largeur/2, joueur->posY - 1, true));
 			joueur->shootTimer = joueur->shootCooldown;   //on reset le cooldown de tir du joueur pour que update puisse le faire baisser a chaque frame pour pouvoir retirer
         }
     }

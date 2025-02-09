@@ -83,7 +83,7 @@ BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y)
     shootCooldown = 100;   // 100 frames avant de tirer donc plus gros chiffre = tir plus lent
 	typeEnnemi = BASIC;
     hauteur = 2;
-	largeur = 6;
+	largeur = 4;
 }
 
 void BasicEnnemi::update() 
