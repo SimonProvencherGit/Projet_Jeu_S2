@@ -6,13 +6,18 @@
 
 using namespace std;
 
+//definit la taille du jeu
 const int WIDTH = 60;
 const int HEIGHT = 50;
+enum typeEntites{JOUEUR, ENNEMI, OBSTACLE, BULLET};
+enum typeEnnemis {BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, BOSS};
+enum typeBullets {NORMAL, LASER, MULTIPLE, HOMING, BOMB};
 
-class Entite {
+class Entite 
+{
     protected:
-    int tailleLong;
-    int tailleLarg;
+    //int tailleLong;
+    //int tailleLarg;
 
     public:
     int posX, posY;
@@ -23,9 +28,10 @@ class Entite {
 	int nbVies;
     bool allieOuEnnemi;
     int moveTimer;
+    bool collisionJoueur;
+	typeEntites type;
 
     Entite(int x, int y, char symb);
-    virtual ~Entite() = default;
     virtual void update() = 0;
 	void perdVie();
     virtual bool enCollision(int px, int py);  // retourne vrai si px et py sont egaux au x et y de l'entite
@@ -33,7 +39,8 @@ class Entite {
 
 //-----------------------------------------------------------  classe Joueur -----------------------------------------------------------
 
-class Joueur : public Entite {
+class Joueur : public Entite 
+{
     private:
     int attkDmg;
     int vitesse;
@@ -42,28 +49,27 @@ class Joueur : public Entite {
     public:
     Joueur(int x, int y);       //probalement autre chose a ajouter
     ~Joueur();
-	//void perdVie();
 	void update() override;     //gere le deplacement du joueur
 };
 
 //-----------------------------------------------------------  classes Ennemi -----------------------------------------------------------
 
-class Ennemi : public Entite {
+class Ennemi : public Entite 
+{
     protected:
-    int type;
+    typeEnnemis typeEnnemi;
     int attkDmg;
     int vitesse;
-    int nbVies;
     bool direction;
-public:
+
+    public:
     Ennemi(int x, int y);
-    ~Ennemi();
-   // void perdVie();
 	virtual void update() = 0;     //gere le deplacement de l'ennemi
 };
 
-class BasicEnnemi : public Ennemi {
-public:
+class BasicEnnemi : public Ennemi 
+{
+    public:
     BasicEnnemi(int x, int y);
     void update() override;    //gere le deplacement de l'ennemi
     
@@ -71,14 +77,18 @@ public:
 
 //-----------------------------------------------------------  classes Bullet -----------------------------------------------------------
 
-class Bullet : public Entite {
+class Bullet : public Entite 
+{
     public:
+	typeBullets bulletType;
+
     Bullet(int x, int y, bool isPlayerBullet);
     virtual void update() = 0;   //gere le deplacement de la balle dependant de qui l'a tire
 };
 
-class BasicBullet : public Bullet {
-public:
+class BasicBullet : public Bullet 
+{
+    public:
     BasicBullet(int x, int y, bool isPlayerBullet);
     void update() override;    //gere le deplacement de la balle
 };
@@ -87,7 +97,7 @@ public:
 
 class Obstacle : public Entite{
     private :
-    int nbVies;
+    //int nbVies;
 
     public:
     Obstacle(int x, int y, int longueur, int larg, int vie);     
