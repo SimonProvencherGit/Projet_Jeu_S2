@@ -291,8 +291,13 @@ void Interface :: executionJeu()
     hideCursor();
     while(!gameOver)
     {
-        
             gererInput();
+     
+            while (pause == true)
+            {
+                gererInput();   //sert a revenir au jeu si on a fait pause
+                Sleep(10);
+            }
 		    progressionDifficulte();
 		    updateEntites();
             gererCollisions();
@@ -300,11 +305,7 @@ void Interface :: executionJeu()
             updateAffichage();
             Sleep(25);
         
-            while(pause == true)
-            {
-                gererInput();   //sert a revenir au jeu si on a fait pause
-                Sleep(10);
-            }
+            
     }
 	Sleep(2500);
     showCursor();
