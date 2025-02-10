@@ -17,17 +17,19 @@ class Interface
     private:
     Joueur* joueur;
     vector<unique_ptr<Entite>> listEntites;
-
     int score;
     bool gameOver;
     int enemySpawnTimer;
 	bool pause;
+	int posRand;     //pour la position aleatoire de l'ennemi lorsqu'il spawn
+    int anciennePos;	//on garde en memoire la position de l'ennemi precedent pour eviter de le spawn a la meme position
 
     public:
     Interface();
     void gererInput();
 	void progressionDifficulte();
 	void enemySpawn(int nbEnnemi, typeEnnemis enemiVoulu);
+	void positionSpawnRandom();
 	void updateEntites();
     void updateAffichage();
     void gererCollisions();
