@@ -33,6 +33,7 @@ class Entite
     int moveTimer;
     bool collisionJoueur;
 	typeEntites type;
+    bool shoots;
 
     Entite(int x, int y, char symb, int longueurEntite, int largeurEntite);
     virtual void update() = 0;
@@ -78,10 +79,10 @@ class BasicEnnemi : public Ennemi
     
 };
 
-class RapideEnnemi : public Ennemi
+class Tank : public Ennemi
 {
     public:
-	RapideEnnemi(int x, int y);
+	Tank(int x, int y);
 	void update();    //gere le deplacement de l'ennemi
 };
 

@@ -75,7 +75,7 @@ Ennemi::Ennemi(int x, int y) : Entite(x, y, 'X', 1, 1)
 	//set des valeurs par defaut pour les ennemis a etre redefinies dans les classes enfant
     attkDmg = 1;
     vitesse = 1;
-	direction = 0;
+    direction = rand() % 2; ; // 0 A gauche, 1 a droite
     shootCooldown = 50;
     shootTimer = -1;
     nbVies = 1;
@@ -83,6 +83,7 @@ Ennemi::Ennemi(int x, int y) : Entite(x, y, 'X', 1, 1)
 	allieOuEnnemi = false;
 	type = ENNEMI;
     typeEnnemi = BASIC;
+	shoots = true;
 }
 
 void Ennemi::update()
@@ -91,7 +92,6 @@ void Ennemi::update()
 
 BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y)
 {
-    direction = rand() % 2; ; // 0 A gauche, 1 a droite
     symbole = 'W';
 	nbVies = 3;
     shootCooldown = 100;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
@@ -109,7 +109,10 @@ void BasicEnnemi::update()
         if (posX <= 1 || posX + largeur >= WIDTH-1)
             direction = 1 - direction; // Change de Direction
 
-        posX += (direction == 0) ? -1 : 1; // Bouger a gauche ou a droite
+        if (direction == 0)
+            posX -= 1;
+        else
+            posX += 1; // Bouger a gauche ou a droite
     }
 
 	if (moveTimer % 8 == 0)   //a toute les 8 update on peut bouger en Y
@@ -127,12 +130,12 @@ void BasicEnnemi::update()
 
 DiveBomber::DiveBomber(int x, int y) : Ennemi(x, y)
 {
-    direction = rand() % 2; ; // 0 A gauche, 1 a droite
     symbole = 'V';
     nbVies = 3;
     typeEnnemi = DIVEBOMBER;
     hauteur = 4;
     largeur = 2;
+	shoots = false;
 }
 
 //le diveBomber est kamikaze qui va directement vers le joueur
@@ -154,6 +157,37 @@ void DiveBomber::update()
 	if (posY >= HEIGHT)     //si l'ennemi atteint le bas de l'ecran is meurt
 		enVie = false;
 	moveTimer++;
+}
+
+Tank::Tank(int x, int y) : Ennemi(x, y)
+{
+	symbole = '=';
+	nbVies = 15;
+	typeEnnemi = TANK;
+	hauteur = 1;
+	largeur = 10;
+	shoots = false;
+}
+
+void Tank::update()
+{
+    if (moveTimer % 5 == 0)
+    {
+        if(posY <= HEIGHT/3)
+		    posY++;
+    }
+	if (moveTimer % 50 == 0)
+	{
+		if (posX <= 1 || posX + largeur >= WIDTH - 1)
+			direction = 1 - direction; // Change de Direction
+        if (direction == 0) 
+            posX -= 1; 
+        else 
+            posX += 1; // Bouger a gauche ou a droite
+	}
+    if (moveTimer >= 100)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+        moveTimer = 0;
+    moveTimer++;
 }
 
 
@@ -217,3 +251,4 @@ void Obstacle::update()
     if (nbVies <= 0) 
         enVie = false;
 }
+
