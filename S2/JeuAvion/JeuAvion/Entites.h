@@ -3,6 +3,7 @@
 
 #include <windows.h>    //pour le curseur de la console et sleep()
 //#include "Interface.h"
+#include "SFX.h"
 
 using namespace std;
 
@@ -21,6 +22,7 @@ class Entite
 
     public:
     int posX, posY;
+	int xJoueur, yJoueur;
 	int largeur, hauteur;
     int shootCooldown;
 	int shootTimer;
@@ -36,6 +38,7 @@ class Entite
     virtual void update() = 0;
 	void perdVie();
     virtual bool enCollision(int px, int py);  // retourne vrai si px et py sont egaux au x et y de l'entite
+    virtual void getPosJoueur(int x, int y);
 };
 
 //-----------------------------------------------------------  classe Joueur -----------------------------------------------------------
@@ -49,8 +52,7 @@ class Joueur : public Entite
 
     public:
     Joueur(int x, int y);       //probalement autre chose a ajouter
-    ~Joueur();
-	void update() override;     //gere le deplacement du joueur
+	void update();     //gere le deplacement du joueur
 };
 
 //-----------------------------------------------------------  classes Ennemi -----------------------------------------------------------
@@ -72,8 +74,22 @@ class BasicEnnemi : public Ennemi
 {
     public:
     BasicEnnemi(int x, int y);
-    void update() override;    //gere le deplacement de l'ennemi
+    void update();    //gere le deplacement de l'ennemi
     
+};
+
+class RapideEnnemi : public Ennemi
+{
+    public:
+	RapideEnnemi(int x, int y);
+	void update();    //gere le deplacement de l'ennemi
+};
+
+class DiveBomber : public Ennemi
+{
+    public:
+	DiveBomber(int x, int y);
+	void update();    //gere le deplacement de l'ennemi
 };
 
 //-----------------------------------------------------------  classes Bullet -----------------------------------------------------------
@@ -84,7 +100,7 @@ class Bullet : public Entite
 	typeBullets bulletType;
 
     Bullet(int x, int y, bool isPlayerBullet);
-    virtual void update() = 0;   //gere le deplacement de la balle dependant de qui l'a tire
+	virtual void update() = 0;   //gere le deplacement de la balle dependant de qui l'a tire on donne la pos x, y du joueur pour les bullets a tete chercheuse
 };
 
 class BasicBullet : public Bullet 
@@ -102,7 +118,7 @@ class Obstacle : public Entite{
 
     public:
     Obstacle(int x, int y, int longueur, int larg, int vie);     
-    void update() override;    //met a jour la vie de l'obstacle
+    void update();    //met a jour la vie de l'obstacle
 };
 
 #endif 

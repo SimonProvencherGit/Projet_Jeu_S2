@@ -1,4 +1,5 @@
 #include "Entites.h"
+SFX sfxx;        //explication a mettre ici
 
 Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 {
@@ -16,7 +17,11 @@ Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 	nbVies = 1;
     allieOuEnnemi = false;
 	type = ENNEMI;      
+	xJoueur = 0;
+	yJoueur = 0;
 }
+
+
 
 bool Entite::enCollision(int px, int py) 
 {
@@ -24,6 +29,12 @@ bool Entite::enCollision(int px, int py)
         return 1;
 
     return 0;
+}
+
+void Entite::getPosJoueur(int x, int y)
+{
+	xJoueur = x;
+	yJoueur = y;
 }
 
 void Entite::perdVie()
@@ -49,7 +60,6 @@ Joueur::Joueur(int x, int y) : Entite(x, y, '^', 1, 1)  //on set les valeurs par
 	type = JOUEUR;
 }
 
-Joueur::~Joueur() {}
 
 void Joueur::update()
 {
@@ -75,18 +85,24 @@ Ennemi::Ennemi(int x, int y) : Entite(x, y, 'X', 1, 1)
     typeEnnemi = BASIC;
 }
 
+void Ennemi::update()
+{
+}
+
 BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y)
 {
     direction = rand() % 2; ; // 0 A gauche, 1 a droite
     symbole = 'W';
 	nbVies = 3;
     shootCooldown = 100;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
-	typeEnnemi = BASIC;
+	shootTimer = rand() % shootCooldown;   //on set le timer de tir a un nombre aleatoire entre 0 et le cooldown de tir
+    typeEnnemi = BASIC;
     hauteur = 2;
 	largeur = 4;
+	moveTimer = rand() % shootCooldown;   //on set le timer de mouvement a un nombre aleatoire entre 0 et le cooldown de tir pour que les ennemis tirent a des moments differents
 }
 
-void BasicEnnemi::update() 
+void BasicEnnemi::update()
 {
     if (moveTimer % 5 == 0)         //a toute les 5 update on peut bouger en X 
     {
@@ -106,6 +122,38 @@ void BasicEnnemi::update()
         enVie = false;
     
     moveTimer++;
+}
+
+
+DiveBomber::DiveBomber(int x, int y) : Ennemi(x, y)
+{
+    direction = rand() % 2; ; // 0 A gauche, 1 a droite
+    symbole = 'V';
+    nbVies = 3;
+    typeEnnemi = DIVEBOMBER;
+    hauteur = 4;
+    largeur = 2;
+}
+
+//le diveBomber est kamikaze qui va directement vers le joueur
+void DiveBomber::update()
+{
+	if (moveTimer % 2 == 0)         //on peut ajuster la vitesse en x du diveBomber
+	{
+		if (posX < xJoueur)
+			posX++;
+		else if (posX > xJoueur)
+			posX--;
+	}
+	if (moveTimer % 1 == 0)         //on peut ajuster la vitesse du diveBomber
+	{
+		posY++;
+	}
+	if (moveTimer >= 100)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+		moveTimer = 0;
+	if (posY >= HEIGHT)     //si l'ennemi atteint le bas de l'ecran is meurt
+		enVie = false;
+	moveTimer++;
 }
 
 
@@ -129,6 +177,7 @@ BasicBullet::BasicBullet(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPla
     bulletType = NORMAL;
 	hauteur = 1;
 	largeur = 1;
+    sfxx.PlaySFXAsync("basicbullet.wav");
 }
 
 void BasicBullet::update()
@@ -168,4 +217,3 @@ void Obstacle::update()
     if (nbVies <= 0) 
         enVie = false;
 }
-
