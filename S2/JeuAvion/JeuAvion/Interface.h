@@ -21,6 +21,7 @@ class Interface
     int score;
     bool gameOver;
     int enemySpawnTimer;
+	bool pause;
 
     public:
     Interface();

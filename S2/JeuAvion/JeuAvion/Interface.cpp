@@ -6,6 +6,7 @@ Interface :: Interface()
     score = 0;
     gameOver = false;
     enemySpawnTimer = 0;
+	pause = false;
 
     listEntites.emplace_back(make_unique<Joueur>(WIDTH / 2, HEIGHT - 1));   //ajoute le joueur a la liste d'entites
 	joueur = static_cast<Joueur*>(listEntites.back().get());                //on recupere le * du joueur de la liste d'entites
@@ -15,31 +16,43 @@ Interface :: Interface()
 //gere les inputs du joueur
 void Interface :: gererInput()
 {
-	if (GetAsyncKeyState(VK_LEFT) < 0 || GetAsyncKeyState('A') < 0)   //on verifie si la fleche gauche ou D est pressee
-        if (joueur->posX > 0) 
-            joueur->posX--;
-    
-    if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState('D') < 0)
-        if (joueur->posX < WIDTH - 1) 
-            joueur->posX++;
-    
-    if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState('W') < 0)
-        if (joueur->posY > HEIGHT / 3)      //le joueur a acces au 2/3 de l'ecran
-            joueur->posY--;
-   
-    if (GetAsyncKeyState(VK_DOWN) < 0 || GetAsyncKeyState('S') < 0)
-        if (joueur->posY < HEIGHT - 1) 
-            joueur->posY++;
-    if (GetAsyncKeyState(VK_SPACE) < 0) 
+    if (pause == false)
     {
-		if (joueur->shootTimer == 0)    //on tire si on peut
+
+        if (GetAsyncKeyState(VK_LEFT) < 0 || GetAsyncKeyState('A') < 0)   //on verifie si la fleche gauche ou D est pressee
+            if (joueur->posX > 0)
+                joueur->posX--;
+
+        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState('D') < 0)
+            if (joueur->posX < WIDTH - 1)
+                joueur->posX++;
+
+        if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState('W') < 0)
+            if (joueur->posY > HEIGHT / 3)      //le joueur a acces au 2/3 de l'ecran
+                joueur->posY--;
+
+        if (GetAsyncKeyState(VK_DOWN) < 0 || GetAsyncKeyState('S') < 0)
+            if (joueur->posY < HEIGHT - 1)
+                joueur->posY++;
+        if (GetAsyncKeyState(VK_SPACE) < 0)
         {
-            listEntites.emplace_back(make_unique<BasicBullet>(joueur->posX + joueur->largeur/2, joueur->posY - 1, true));
-			joueur->shootTimer = joueur->shootCooldown;   //on reset le cooldown de tir du joueur pour que update puisse le faire baisser a chaque frame pour pouvoir retirer
+            if (joueur->shootTimer == 0)    //on tire si on peut
+            {
+                listEntites.emplace_back(make_unique<BasicBullet>(joueur->posX + joueur->largeur / 2, joueur->posY - 1, true));
+                joueur->shootTimer = joueur->shootCooldown;   //on reset le cooldown de tir du joueur pour que update puisse le faire baisser a chaque frame pour pouvoir retirer
+            }
         }
     }
-    if (GetAsyncKeyState('Q') < 0) {
+    if (GetAsyncKeyState('Q') < 0) 
         gameOver = true;
+    
+    if (GetAsyncKeyState('P') < 0) 
+    {
+		if (pause)
+			pause = false;
+		else if (!pause)
+            pause = true;
+		Sleep(200);
     }
 }
 
@@ -152,7 +165,7 @@ void Interface::gererCollisions()
             {
                 if (e->type == ENNEMI && e->collisionJoueur == false)
                 {
-                    for (int i = 0; i < 2; i++)     //joueur perd 2 vies si il entre en collision avec un ennemi
+					for (int i = 0; i < 2; i++)     //joueur perd 2 vies si il entre en collision avec un ennemi   // pour peut ajouter un nb de degats a chaque ennemi
                     {
                         if (joueur->nbVies > 0)
                             joueur->perdVie();
@@ -278,14 +291,20 @@ void Interface :: executionJeu()
     hideCursor();
     while(!gameOver)
     {
-		progressionDifficulte();
-        gererInput();
-		updateEntites();
-        gererCollisions();
-        enleverEntites();
-        updateAffichage();
-        Sleep(25);
-        //probablement autre chose
+        
+            gererInput();
+		    progressionDifficulte();
+		    updateEntites();
+            gererCollisions();
+            enleverEntites();
+            updateAffichage();
+            Sleep(25);
+        
+            while(pause == true)
+            {
+                gererInput();   //sert a revenir au jeu si on a fait pause
+                Sleep(10);
+            }
     }
 	Sleep(2500);
     showCursor();
