@@ -203,26 +203,29 @@ void Interface::gererCollisions()
             {
 				for (auto& e2 : listEntites)	//on parcourt la liste d'entites pour voir si la bullet entre en collision avec un ennemi
                 {
-                    if (e2->enVie && e2->enCollision(e->posX, e->posY) && e2->symbole != e->symbole)       // si qqlch entre en collision avec la bullet allie et le e->symbole est pour pas que la bullet entre en collision avec elle meme 
+                    if (e2->enVie)
                     {
-                        /*if (e2->symbole == 'o' && !e2->bulletAllie)      //si c'est un fragmenting bullet d'unennemi
-                            for (int i = -1; i < 2; i++)	//commence a -1 pour que le premier fragment commence a la gauche de la bullet
-                                bufferBullets.emplace_back(make_unique<BasicBullet>(e2->posX + i, e2->posY+1, false));
-                        */
-                        e2->perdVie();
-                        e->enVie = false;
+                        if (e2->enVie && e2->enCollision(e->posX, e->posY) && e2->symbole != e->symbole)       // si qqlch entre en collision avec la bullet allie et le e->symbole est pour pas que la bullet entre en collision avec elle meme 
+                        {
+                            if (e2->symbole == 'o' && !e2->bulletAllie)      //si c'est un fragmenting bullet d'unennemi
+                                for (int i = -1; i < 2; i++)	//commence a -1 pour que le premier fragment commence a la gauche de la bullet
+                                    bufferBullets.emplace_back(make_unique<BasicBullet>(e2->posX+i, e2->posY + 1, false));
 
-                        if (!e2->enVie && e2->typeEntite != BULLET)
-                            score += 10;
+                            e2->perdVie();
+                            e->enVie = false;
+
+                            if (!e2->enVie && e2->typeEntite != BULLET)
+                                score += 10;
+                        }
                     }
                 }
-                for (auto& bullet : bufferBullets)
-                    listEntites.push_back(move(bullet));	//on ajoute les bullets du buffer a la liste d'entites
             }
             else 
                 e->collisionJoueur = false;
         }
     }
+    for (auto& bullet : bufferBullets)
+        listEntites.push_back(move(bullet));	//on ajoute les bullets du buffer a la liste d'entites
 }
 
 
@@ -318,7 +321,7 @@ void Interface :: executionJeu()
 		    progressionDifficulte();
 		    updateEntites();
             gererCollisions();
-            enleverEntites();  
+            enleverEntites();
             updateAffichage();
             Sleep(25);
 
