@@ -109,12 +109,12 @@ void Interface::progressionDifficulte()
     if (score < 300)
     {
 
-        if (enemySpawnTimer >= 70)          //on fait spawn une vague d'ennemis a toutes les 70 frames
+        if (enemySpawnTimer >= 100)          //on fait spawn une vague d'ennemis a toutes les 70 frames
         {
-            //enemySpawn(2, BASIC);   //on fait spawn 3 ennemis a chaque vague
-			//enemySpawn(1, DIVEBOMBER);
-			//enemySpawn(1, TANK);
-			enemySpawn(2, ARTILLEUR);
+            enemySpawn(2, BASIC);   //on fait spawn 3 ennemis a chaque vague
+			enemySpawn(1, DIVEBOMBER);
+			enemySpawn(1, TANK);
+			enemySpawn(1, ARTILLEUR);
             enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
         }
     }
@@ -205,14 +205,14 @@ void Interface::gererCollisions()
                 {
                     if (e2->enVie && e2->enCollision(e->posX, e->posY) && e2->symbole != e->symbole)       // si qqlch entre en collision avec la bullet allie et le e->symbole est pour pas que la bullet entre en collision avec elle meme 
                     {
-                        if(e2->symbole == 'o' && !e2->bulletAllie)      //si c'est un fragmenting bullet d'unennemi
+                        /*if (e2->symbole == 'o' && !e2->bulletAllie)      //si c'est un fragmenting bullet d'unennemi
                             for (int i = -1; i < 2; i++)	//commence a -1 pour que le premier fragment commence a la gauche de la bullet
                                 bufferBullets.emplace_back(make_unique<BasicBullet>(e2->posX + i, e2->posY+1, false));
-
+                        */
                         e2->perdVie();
                         e->enVie = false;
 
-                        if (!e2->enVie && e2->typeEntite == ENNEMI)
+                        if (!e2->enVie && e2->typeEntite != BULLET)
                             score += 10;
                     }
                 }

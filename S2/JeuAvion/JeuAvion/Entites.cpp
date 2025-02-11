@@ -204,7 +204,7 @@ Artilleur::Artilleur(int x, int y) : Ennemi(x, y)
     nbVies = 3;
 	typeEnnemi = ARTILLEUR;
 	hauteur = 2;
-	largeur = 3;
+	largeur = 2;
     shootCooldown = 80;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
 	posRand = rand() % 6;   //donne une valeur qu'on va ajouter a son y pour pas qu'ils soient tous alignes
 	ammoType = FRAGMENTING;
