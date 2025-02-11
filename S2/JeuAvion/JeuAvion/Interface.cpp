@@ -20,7 +20,7 @@ void Interface :: gererInput()
     {
 
         if (GetAsyncKeyState(VK_LEFT) < 0 || GetAsyncKeyState('A') < 0)   //on verifie si la fleche gauche ou D est pressee
-            if (joueur->posX > 0)
+            if (joueur->posX > 1)
                 joueur->posX--;
 
         if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState('D') < 0)
@@ -32,7 +32,7 @@ void Interface :: gererInput()
                 joueur->posY--;
 
         if (GetAsyncKeyState(VK_DOWN) < 0 || GetAsyncKeyState('S') < 0)
-            if (joueur->posY < HEIGHT - 1)
+            if (joueur->posY < HEIGHT)
                 joueur->posY++;
         if (GetAsyncKeyState(VK_SPACE) < 0)
         {
@@ -80,7 +80,8 @@ void Interface::enemySpawn(int nbEnnemi, typeEnnemis ennemiVoulu)
             positionSpawnRandom();
             break;
         case ARTILLEUR:
-            //listEntites.emplace_back(make_unique<ArtilleurEnnemi>(posRand, 0));
+            listEntites.emplace_back(make_unique<Artilleur>(posRand, 0));
+			positionSpawnRandom();
             break;
         case DIVEBOMBER:
 			listEntites.emplace_back(make_unique<DiveBomber>(posRand, 0));
@@ -110,9 +111,10 @@ void Interface::progressionDifficulte()
 
         if (enemySpawnTimer >= 70)          //on fait spawn une vague d'ennemis a toutes les 70 frames
         {
-            enemySpawn(2, BASIC);   //on fait spawn 3 ennemis a chaque vague
+            //enemySpawn(2, BASIC);   //on fait spawn 3 ennemis a chaque vague
 			//enemySpawn(1, DIVEBOMBER);
-			enemySpawn(1, TANK);
+			//enemySpawn(1, TANK);
+			enemySpawn(2, ARTILLEUR);
             enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
         }
     }
@@ -139,18 +141,20 @@ void Interface::progressionDifficulte()
 //met a jour les entites a chaque frame
 void Interface::updateEntites()
 {
-    vector<unique_ptr<Entite>> bufferBullets;  //on fait un buffer
+    vector<unique_ptr<Entite>> bufferBullets;  //on fait un buffer pour les bullets
 
     for (auto& e : listEntites)     //on parcourt la liste d'entites
     {
         if (e->enVie)
         {
-			e->getPosJoueur(joueur->posX, joueur->posY);    //on donne la position du joueur a chaque entite
+			e->getPosJoueur(joueur->posX, joueur->posY);    //on donne la position du joueur a chaque entite, va etre utliser pour les choses a tete chercheuse etc.
 			e->update();    //on met a jour l'entite
 
-            if (e->type == ENNEMI && e->moveTimer % e->shootCooldown == 0 && e->shoots)    //on verifie si c'est un ennemi et si sont compteur pour tirer est a 0
+            if (e->typeEntite == ENNEMI && e->ammoType == NORMAL && e->moveTimer % e->shootCooldown == 0 && e->shoots)    //on verifie si c'est un ennemi et si sont compteur pour tirer est a 0
                 bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX + e->largeur / 2, e->posY + 1, false));           //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour 
                                                                                                                                // eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle                                                                                                                  
+			if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0)
+				bufferBullets.emplace_back(make_unique<FragmentingBullet>(e->posX + e->largeur / 2, e->posY + 1, false));
         }
     }
 	for (auto& bullet : bufferBullets) 
@@ -161,6 +165,8 @@ void Interface::updateEntites()
 //gere les collisions entre les entites
 void Interface::gererCollisions()
 {
+    vector<unique_ptr<Entite>> bufferBullets;  //on fait un buffer pour les bullets car on ne peut pas ajouter a la liste entite pendant qu`on itere a travers
+
     for (auto& e : listEntites)
     {
         if (e->enVie)
@@ -168,7 +174,7 @@ void Interface::gererCollisions()
             //on verifie si un enemi ou un bullet est entre en collision avec le joueur et verifie que e n'est pas joueur
             if (joueur->enCollision(e->posX, e->posY) && e->symbole != '^')
             {
-                if (e->type == ENNEMI && e->collisionJoueur == false)
+                if (e->typeEntite == ENNEMI && e->collisionJoueur == false)
                 {
 					for (int i = 0; i < 2; i++)     //joueur perd 2 vies si il entre en collision avec un ennemi   // pour peut ajouter un nb de degats a chaque ennemi
                     {
@@ -180,10 +186,10 @@ void Interface::gererCollisions()
                     }
                     e->collisionJoueur = true;
                 }
-                else if (e->type == BULLET && e->collisionJoueur == false)     //si le joueur entre en collision avec une bullet ennemi il perd une vie
+                else if (e->typeEntite == BULLET && e->collisionJoueur == false)     //si le joueur entre en collision avec une bullet ennemi il perd une vie
                 {
                     if (joueur->nbVies > 0)
-                        joueur->perdVie();
+                         joueur->perdVie();
 
                     if (!joueur->enVie)
                         gameOver = true;
@@ -192,23 +198,29 @@ void Interface::gererCollisions()
                 }
 
             }
-            //on verifie si un bullet entre en collision avec un ennemi et si ell est un tir allie
-            else if (e->symbole == '|' && e->allieOuEnnemi)
+			//partie ou on gere les collision avec les bullets alliees
+			else if (e->typeEntite == BULLET && e->ammoType == joueur->ammoType && e->bulletAllie)  //on verifie si c'est un bullet allie tire par le joueur
             {
-                for (auto& e2 : listEntites)
+				for (auto& e2 : listEntites)	//on parcourt la liste d'entites pour voir si la bullet entre en collision avec un ennemi
                 {
-                    if (e2->enVie && e2->enCollision(e->posX, e->posY) && e2->symbole != '|')
+                    if (e2->enVie && e2->enCollision(e->posX, e->posY) && e2->symbole != e->symbole)       // si qqlch entre en collision avec la bullet allie et le e->symbole est pour pas que la bullet entre en collision avec elle meme 
                     {
+                        if(e2->symbole == 'o' && !e2->bulletAllie)      //si c'est un fragmenting bullet d'unennemi
+                            for (int i = -1; i < 2; i++)	//commence a -1 pour que le premier fragment commence a la gauche de la bullet
+                                bufferBullets.emplace_back(make_unique<BasicBullet>(e2->posX + i, e2->posY+1, false));
+
                         e2->perdVie();
                         e->enVie = false;
-                        if (!e2->enVie)
+
+                        if (!e2->enVie && e2->typeEntite == ENNEMI)
                             score += 10;
                     }
                 }
+                for (auto& bullet : bufferBullets)
+                    listEntites.push_back(move(bullet));	//on ajoute les bullets du buffer a la liste d'entites
             }
-            else {
+            else 
                 e->collisionJoueur = false;
-            }
         }
     }
 }

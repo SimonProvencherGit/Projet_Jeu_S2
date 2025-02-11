@@ -13,12 +13,14 @@ Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
     collisionJoueur = false;
     shootCooldown = -1;
     shootTimer = -1;
-    moveTimer = -1;
+    moveTimer = 0;
 	nbVies = 1;
-    allieOuEnnemi = false;
-	type = ENNEMI;      
+    bulletAllie = false;
+	typeEntite = ENNEMI;      
 	xJoueur = 0;
 	yJoueur = 0;
+	shoots = true;
+	ammoType = NORMAL;
 }
 
 
@@ -39,7 +41,7 @@ void Entite::getPosJoueur(int x, int y)
 
 void Entite::perdVie()
 {
-    if (nbVies > 0) 
+    if (nbVies > 0 && enVie) 
     {
         nbVies--;
         if (nbVies == 0)
@@ -56,8 +58,8 @@ Joueur::Joueur(int x, int y) : Entite(x, y, '^', 1, 1)  //on set les valeurs par
     vitesse = 1;
     shootCooldown = 3;
 	shootTimer = 0;
-	allieOuEnnemi = true;
-	type = JOUEUR;
+	bulletAllie = true;
+	typeEntite = JOUEUR;
 }
 
 
@@ -80,10 +82,11 @@ Ennemi::Ennemi(int x, int y) : Entite(x, y, 'X', 1, 1)
     shootTimer = -1;
     nbVies = 1;
 	moveTimer = 0;
-	allieOuEnnemi = false;
-	type = ENNEMI;
+	bulletAllie = false;
+	typeEntite = ENNEMI;
     typeEnnemi = BASIC;
 	shoots = true;
+	posRand = 0;
 }
 
 void Ennemi::update()
@@ -95,7 +98,7 @@ BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y)
     symbole = 'W';
 	nbVies = 3;
     shootCooldown = 100;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
-	shootTimer = rand() % shootCooldown;   //on set le timer de tir a un nombre aleatoire entre 0 et le cooldown de tir
+	//shootTimer = rand() % shootCooldown;   //on set le timer de tir a un nombre aleatoire entre 0 et le cooldown de tir
     typeEnnemi = BASIC;
     hauteur = 2;
 	largeur = 4;
@@ -138,6 +141,7 @@ DiveBomber::DiveBomber(int x, int y) : Ennemi(x, y)
 	shoots = false;
 }
 
+
 //le diveBomber est kamikaze qui va directement vers le joueur
 void DiveBomber::update()
 {
@@ -161,19 +165,20 @@ void DiveBomber::update()
 
 Tank::Tank(int x, int y) : Ennemi(x, y)
 {
-	symbole = '=';
-	nbVies = 15;
+	symbole = '@';
+	nbVies = 12;
 	typeEnnemi = TANK;
 	hauteur = 1;
-	largeur = 10;
+	largeur = 9;
 	shoots = false;
+    posRand = rand() % 4;   //donne une valeur qu'on va ajouter a son y pour pas qu'ils soient tous alignes
 }
 
 void Tank::update()
 {
     if (moveTimer % 5 == 0)
     {
-        if(posY <= HEIGHT/3)
+        if(posY <= HEIGHT/3 + posRand)
 		    posY++;
     }
 	if (moveTimer % 50 == 0)
@@ -191,17 +196,47 @@ void Tank::update()
 }
 
 
+
+Artilleur::Artilleur(int x, int y) : Ennemi(x, y)
+{
+    shoots = true;
+	symbole = 'H';
+    nbVies = 3;
+	typeEnnemi = ARTILLEUR;
+	hauteur = 2;
+	largeur = 3;
+    shootCooldown = 80;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
+	posRand = rand() % 6;   //donne une valeur qu'on va ajouter a son y pour pas qu'ils soient tous alignes
+	ammoType = FRAGMENTING;
+}
+
+void Artilleur::update()
+{
+	if (posY <= (HEIGHT / 10) - posRand && moveTimer % 8 == 0)
+		posY++;
+
+	if (moveTimer % 50 == 0)
+	{
+		if (posX <= 1 || posX + largeur >= WIDTH - 1)
+			direction = 1 - direction; // Change de Direction
+		if (direction == 0)
+			posX -= 1;
+		else
+			posX += 1; // Bouger a gauche ou a droite
+	}
+
+	moveTimer++;
+}
+
+
 //******************************** classe bullet ***********************************
 
 Bullet::Bullet(int x, int y, bool isPlayerBullet) : Entite(x, y,'|', 1, 1)
 {
 	//set des valeurs par defaut pour les bullets a etre redefinies dans les classes enfant
-	nbVies = 1;
-	allieOuEnnemi = isPlayerBullet;
-	type = BULLET;
-    shootCooldown = -1;
-    shootTimer = -1;
-    moveTimer = 1;
+	nbVies = 0;
+	bulletAllie = isPlayerBullet;
+	typeEntite = BULLET;
 	bulletType = NORMAL;
 }
 
@@ -216,7 +251,7 @@ BasicBullet::BasicBullet(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPla
 
 void BasicBullet::update()
 {
-    if (allieOuEnnemi)
+    if (bulletAllie)
     {
         if (moveTimer % 1 == 0) {       //on va pouvoir changer la vitesse de la bullet dependant du modulo
             posY--;
@@ -228,7 +263,7 @@ void BasicBullet::update()
     {
 		if (moveTimer % 1 == 0) {       //on peut aussi ajuster la vitesse des bullets ennemis
             posY++;
-            if (posY >= HEIGHT)
+            if (posY >= HEIGHT+1)
                 enVie = false;
         }
     }
@@ -236,6 +271,25 @@ void BasicBullet::update()
 
 	if (moveTimer >= 100)
 		moveTimer = 0;
+}
+
+FragmentingBullet::FragmentingBullet(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
+{
+	symbole = 'o';
+	bulletType = FRAGMENTING;
+	hauteur = 1;
+	largeur = 2;
+	nbVies = 1;
+}
+
+void FragmentingBullet::update()
+{
+	if (moveTimer % 1 == 0)        //on peut aussi ajuster la vitesse des bullets ennemis
+		posY++;
+	
+	if (posY >= HEIGHT + 1)
+		enVie = false;
+	
 }
 
 
@@ -251,4 +305,5 @@ void Obstacle::update()
     if (nbVies <= 0) 
         enVie = false;
 }
+
 

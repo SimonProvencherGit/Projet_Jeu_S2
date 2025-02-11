@@ -12,13 +12,11 @@ const int WIDTH = 60;
 const int HEIGHT = 50;
 enum typeEntites{JOUEUR, ENNEMI, OBSTACLE, BULLET};
 enum typeEnnemis {BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, BOSS};
-enum typeBullets {NORMAL, LASER, MULTIPLE, HOMING, BOMB};
+enum typeBullets {NORMAL, LASER, MULTIPLE, HOMING, BOMB, FRAGMENTING};
 
 class Entite 
 {
     protected:
-    //int tailleLong;
-    //int tailleLarg;
 
     public:
     int posX, posY;
@@ -29,10 +27,11 @@ class Entite
     bool enVie;
     char symbole;
 	int nbVies;
-    bool allieOuEnnemi;
+    bool bulletAllie;
     int moveTimer;
     bool collisionJoueur;
-	typeEntites type;
+	typeEntites typeEntite;
+	typeBullets ammoType;
     bool shoots;
 
     Entite(int x, int y, char symb, int longueurEntite, int largeurEntite);
@@ -65,6 +64,7 @@ class Ennemi : public Entite
     int attkDmg;
     int vitesse;
     bool direction;
+	int posRand;
 
     public:
     Ennemi(int x, int y);
@@ -93,6 +93,13 @@ class DiveBomber : public Ennemi
 	void update();    //gere le deplacement de l'ennemi
 };
 
+class Artilleur : public Ennemi
+{
+    public:
+	Artilleur(int x, int y);
+	void update();    //gere le deplacement de l'ennemi
+};
+
 //-----------------------------------------------------------  classes Bullet -----------------------------------------------------------
 
 class Bullet : public Entite 
@@ -109,6 +116,13 @@ class BasicBullet : public Bullet
     public:
     BasicBullet(int x, int y, bool isPlayerBullet);
     void update() override;    //gere le deplacement de la balle
+};
+
+class FragmentingBullet : public Bullet
+{
+public:
+	FragmentingBullet(int x, int y, bool isPlayerBullet);
+	void update();    //gere le deplacement de la balle
 };
 
 //-----------------------------------------------------------  classes Obstacle -----------------------------------------------------------
