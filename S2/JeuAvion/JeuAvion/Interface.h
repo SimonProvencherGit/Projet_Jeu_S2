@@ -32,8 +32,8 @@ class Interface
 	void positionSpawnRandom();
 	void updateEntites();
     void updateAffichage();
-    void gererCollisions();
     void enleverEntites();
+    void gererCollisions();
     void executionJeu();
 	void hideCursor();
 	void showCursor();
