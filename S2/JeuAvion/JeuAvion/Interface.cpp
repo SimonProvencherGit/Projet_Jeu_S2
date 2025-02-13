@@ -7,6 +7,8 @@ Interface :: Interface()
     gameOver = false;
     enemySpawnTimer = 0;
 	pause = false;
+    posRand = 0;
+	anciennePos = 0;
 
     listEntites.emplace_back(make_unique<Joueur>(WIDTH / 2, HEIGHT - 1));   //ajoute le joueur a la liste d'entites
 	joueur = static_cast<Joueur*>(listEntites.back().get());                //on recupere le * du joueur de la liste d'entites
@@ -131,7 +133,8 @@ void Interface::progressionDifficulte()
 	{
 		if (enemySpawnTimer >= 40)          //on fait spawn une vague d'ennemis a toutes les 50 frames
 		{
-			enemySpawn(4, BASIC);   //on fait spawn 5 ennemis a chaque vague
+			enemySpawn(3, ARTILLEUR);   
+			//enemySpawn(4, BASIC);   //on fait spawn 5 ennemis a chaque vague
             enemySpawn(2, DIVEBOMBER);
 			enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
 		}
@@ -171,32 +174,28 @@ void Interface::gererCollisions()
     {
         if (e->enVie)
         {
-            //on verifie si un enemi ou un bullet est entre en collision avec le joueur et verifie que e n'est pas joueur
-            if (joueur->enCollision(e->posX, e->posY) && e->symbole != '^')
+            if (joueur->enCollision(e->posX, e->posY) && e->symbole != '^')     //on verifie si un enemi ou un bullet est entre en collision avec le joueur et verifie que e n'est pas joueur
             {
                 if (e->typeEntite == ENNEMI && e->collisionJoueur == false)
                 {
-					for (int i = 0; i < 2; i++)     //joueur perd 2 vies si il entre en collision avec un ennemi   // pour peut ajouter un nb de degats a chaque ennemi
-                    {
-                        if (joueur->nbVies > 0)
-                            joueur->perdVie();
+					joueur->perdVie(2);	 //le joueur perd 2 vies si il entre en collision avec un ennemi
+					joueur->invincible = true;     //le joueur est invincible pour un court moment apres
 
-                        if (!joueur->enVie)
-                            gameOver = true;
-                    }
+                    if (!joueur->enVie)
+                        gameOver = true;
+                    
                     e->collisionJoueur = true;
                 }
                 else if (e->typeEntite == BULLET && e->collisionJoueur == false)     //si le joueur entre en collision avec une bullet ennemi il perd une vie
                 {
-                    if (joueur->nbVies > 0)
-                         joueur->perdVie();
+					joueur->perdVie(1);    //le joueur perd 1 vie si il entre en collision avec une bullet ennemi   
+					joueur->invincible = true;     //le joueur est invincible pour un court moment apres
 
                     if (!joueur->enVie)
                         gameOver = true;
 
                     e->collisionJoueur = true;
                 }
-
             }
 			//partie ou on gere les collision avec les bullets alliees
 			else if (e->typeEntite == BULLET && e->ammoType == joueur->ammoType && e->bulletAllie)  //on verifie si c'est un bullet allie tire par le joueur
@@ -211,7 +210,7 @@ void Interface::gererCollisions()
                                 for (int i = -1; i < 2; i++)	//commence a -1 pour que le premier fragment commence a la gauche de la bullet
                                     bufferBullets.emplace_back(make_unique<BasicBullet>(e2->posX+i, e2->posY + 1, false));
 
-                            e2->perdVie();
+                            e2->perdVie(1);
                             e->enVie = false;
 
                             if (!e2->enVie && e2->typeEntite != BULLET)

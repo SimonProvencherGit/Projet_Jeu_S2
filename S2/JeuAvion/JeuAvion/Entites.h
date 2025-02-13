@@ -33,10 +33,12 @@ class Entite
 	typeEntites typeEntite;
 	typeBullets ammoType;
     bool shoots;
+    bool invincible;
+	int invincibleTimer;
 
     Entite(int x, int y, char symb, int longueurEntite, int largeurEntite);
     virtual void update() = 0;
-	void perdVie();
+	void perdVie(int nbVie);
     virtual bool enCollision(int px, int py);  // retourne vrai si px et py sont egaux au x et y de l'entite
     virtual void getPosJoueur(int x, int y);
 };
