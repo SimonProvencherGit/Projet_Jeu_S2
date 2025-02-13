@@ -21,6 +21,8 @@ Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 	yJoueur = 0;
 	shoots = true;
 	ammoType = NORMAL;
+	invincible = false;
+	invincibleTimer = 0;
 }
 
 
@@ -39,34 +41,54 @@ void Entite::getPosJoueur(int x, int y)
 	yJoueur = y;
 }
 
-void Entite::perdVie()
+void Entite::perdVie(int nbVie)
 {
-    if (nbVies > 0 && enVie) 
-    {
-        nbVies--;
-        if (nbVies == 0)
-            enVie = false;
-    }
+	for (int i = 0; i < nbVie; i++)     //joueur perd 2 vies si il entre en collision avec un ennemi   // pour peut ajouter un nb de degats a chaque ennemi
+	{
+		if (nbVies > 0 && enVie && !invincible)
+		{
+			nbVies--;
+			if (nbVies == 0)
+				enVie = false;
+		}
+	}
 }
 
 //******************************** classe joueur ***********************************
 
 Joueur::Joueur(int x, int y) : Entite(x, y, '^', 1, 1)  //on set les valeurs par defaut pour le joueur
 {
-    nbVies = 3;
+    nbVies = 10;
     attkDmg = 1;
     vitesse = 1;
     shootCooldown = 3;
 	shootTimer = 0;
 	bulletAllie = true;
 	typeEntite = JOUEUR;
+
 }
 
 
 void Joueur::update()
 {
+
 	if (shootTimer > 0) 
 	    shootTimer--;
+
+	if (invincible)
+	{
+		symbole = '$';
+
+		if (invincibleTimer % 50 == 0)		//le tmeps d'invincibilite
+			invincible = false;
+	}
+	else
+		symbole = '^';
+	
+	invincibleTimer++;
+
+	if (invincibleTimer >= 500)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+		moveTimer = 0;
 }
 
 
@@ -212,7 +234,7 @@ Artilleur::Artilleur(int x, int y) : Ennemi(x, y)
 
 void Artilleur::update()
 {
-	if (posY <= (HEIGHT / 10) - posRand && moveTimer % 8 == 0)
+	if (posY <= (HEIGHT / 15) + posRand && moveTimer % 8 == 0)
 		posY++;
 
 	if (moveTimer % 50 == 0)
