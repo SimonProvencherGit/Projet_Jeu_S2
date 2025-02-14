@@ -44,7 +44,13 @@ void Interface :: gererInput()
                 joueur->shootTimer = joueur->shootCooldown;   //on reset le cooldown de tir du joueur pour que update puisse le faire baisser a chaque frame pour pouvoir retirer
             }
         }
+        if (GetAsyncKeyState('E') < 0)
+        {
+			if (joueur->barrelRoll == false && joueur->coolDownBarrelRoll <= 0)
+			    joueur->barrelRoll = true;
+        }
     }
+
     if (GetAsyncKeyState('Q') < 0) 
         gameOver = true;
     

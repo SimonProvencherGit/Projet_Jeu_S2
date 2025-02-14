@@ -8,8 +8,8 @@
 using namespace std;
 
 //definit la taille du jeu
-const int WIDTH = 60;
-const int HEIGHT = 50;
+const int WIDTH = 100;
+const int HEIGHT = 40;
 enum typeEntites{JOUEUR, ENNEMI, OBSTACLE, BULLET};
 enum typeEnnemis {BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, BOSS};
 enum typeBullets {NORMAL, LASER, MULTIPLE, HOMING, BOMB, FRAGMENTING};
@@ -50,9 +50,12 @@ class Joueur : public Entite
     private:
     int attkDmg;
     int vitesse;
-	
+    int barrelRollTimer;
 
     public:
+	bool barrelRoll;  
+    int coolDownBarrelRoll;
+
     Joueur(int x, int y);       //probalement autre chose a ajouter
 	void update();     //gere le deplacement du joueur
 };

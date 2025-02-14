@@ -65,7 +65,9 @@ Joueur::Joueur(int x, int y) : Entite(x, y, '^', 1, 1)  //on set les valeurs par
 	shootTimer = 0;
 	bulletAllie = true;
 	typeEntite = JOUEUR;
-
+	barrelRollTimer = 0;
+	barrelRoll = false;
+	coolDownBarrelRoll = 0;
 }
 
 
@@ -75,23 +77,42 @@ void Joueur::update()
 	if (shootTimer > 0) 
 	    shootTimer--;
 
-	if (invincible)
+	if (invincible && !barrelRoll)
 	{
 		symbole = '$';
 
 		if (invincibleTimer % 50 == 0)		//le tmeps d'invincibilite
 			invincible = false;
 	}
-	else
-		symbole = '^';
 	
 	invincibleTimer++;
 
 	if (invincibleTimer >= 500)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
 		moveTimer = 0;
+
+	if (barrelRoll) 
+	{
+		barrelRoll = false;
+		barrelRollTimer = 20;
+		invincible = true;
+		symbole = '&';
+		coolDownBarrelRoll = 75;		// cooldown du barrel roll
+	}
+
+	if (barrelRollTimer <= 0) 
+	{
+		barrelRollTimer = 0;
+		symbole = '^';
+		invincible = false;
+	}
+	if(coolDownBarrelRoll >= 0)
+		coolDownBarrelRoll--;
+	
+	barrelRollTimer--;
+
 }
 
-
+	
 //******************************** classe ennemi ***********************************
 
 Ennemi::Ennemi(int x, int y) : Entite(x, y, 'X', 1, 1) 
