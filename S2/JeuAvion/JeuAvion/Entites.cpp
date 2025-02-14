@@ -90,22 +90,22 @@ void Joueur::update()
 	if (invincibleTimer >= 500)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
 		moveTimer = 0;
 
-	if (barrelRoll) 
+	if (barrelRoll)					//si le joueur fait un barrel roll
 	{
 		barrelRoll = false;
-		barrelRollTimer = 20;
+		barrelRollTimer = 20;		//temps du barrel roll
 		invincible = true;
 		symbole = '&';
 		coolDownBarrelRoll = 75;		// cooldown du barrel roll
 	}
 
-	if (barrelRollTimer <= 0) 
+	if (barrelRollTimer <= 0)	//si le barrel roll est fini
 	{
 		barrelRollTimer = 0;
 		symbole = '^';
 		invincible = false;
 	}
-	if(coolDownBarrelRoll >= 0)
+	if (coolDownBarrelRoll >= 0)		
 		coolDownBarrelRoll--;
 	
 	barrelRollTimer--;
@@ -349,4 +349,16 @@ void Obstacle::update()
         enVie = false;
 }
 
+Laser::Laser(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
+{
+	symbole = '~';
+	bulletType = LASER;
+	hauteur = HEIGHT;
+	largeur = 1;
 
+}
+
+
+void Laser::update()
+{
+}

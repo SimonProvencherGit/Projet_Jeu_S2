@@ -50,10 +50,10 @@ class Joueur : public Entite
     private:
     int attkDmg;
     int vitesse;
-    int barrelRollTimer;
 
     public:
 	bool barrelRoll;  
+    int barrelRollTimer;
     int coolDownBarrelRoll;
 
     Joueur(int x, int y);       //probalement autre chose a ajouter
@@ -127,6 +127,13 @@ class FragmentingBullet : public Bullet
 {
 public:
 	FragmentingBullet(int x, int y, bool isPlayerBullet);
+	void update();    //gere le deplacement de la balle
+};
+
+class Laser : public Bullet
+{
+public:
+	Laser(int x, int y, bool isPlayerBullet);
 	void update();    //gere le deplacement de la balle
 };
 

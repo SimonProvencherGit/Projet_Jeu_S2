@@ -38,7 +38,7 @@ void Interface :: gererInput()
                 joueur->posY++;
         if (GetAsyncKeyState(VK_SPACE) < 0)
         {
-            if (joueur->shootTimer == 0)    //on tire si on peut
+            if (joueur->shootTimer == 0 && joueur->barrelRollTimer <= 0)    //on tire si on peut
             {
                 listEntites.emplace_back(make_unique<BasicBullet>(joueur->posX + joueur->largeur / 2, joueur->posY - 1, true));
                 joueur->shootTimer = joueur->shootCooldown;   //on reset le cooldown de tir du joueur pour que update puisse le faire baisser a chaque frame pour pouvoir retirer
@@ -162,8 +162,8 @@ void Interface::updateEntites()
             if (e->typeEntite == ENNEMI && e->ammoType == NORMAL && e->moveTimer % e->shootCooldown == 0 && e->shoots)    //on verifie si c'est un ennemi et si sont compteur pour tirer est a 0
                 bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX + e->largeur / 2, e->posY + 1, false));           //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour 
                                                                                                                                // eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle                                                                                                                  
-			if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0)
-				bufferBullets.emplace_back(make_unique<FragmentingBullet>(e->posX + e->largeur / 2, e->posY + 1, false));
+            if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0)
+                bufferBullets.emplace_back(make_unique<FragmentingBullet>(e->posX + e->largeur / 2, e->posY + 1, false));
         }
     }
 	for (auto& bullet : bufferBullets) 
