@@ -29,7 +29,7 @@ Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 
 bool Entite::enCollision(int px, int py) 
 {
-	if (px >= posX - 1 && px <= posX + largeur + 1 && py >= posY && py < posY + hauteur)       // on fait une collision si les entites sont a la meme position (+ - 1 pour amelirer la detection)
+	if (px >= posX - 1 && px <= posX + largeur + 1 && py >= posY  && py < posY + hauteur)       // on fait une collision si les entites sont a la meme position (+ - 1 pour amelirer la detection)
         return 1;
 
     return 0;
@@ -65,7 +65,9 @@ Joueur::Joueur(int x, int y) : Entite(x, y, '^', 1, 1)  //on set les valeurs par
 	shootTimer = 0;
 	bulletAllie = true;
 	typeEntite = JOUEUR;
-
+	barrelRollTimer = 0;
+	barrelRoll = false;
+	coolDownBarrelRoll = 0;
 }
 
 
@@ -75,23 +77,41 @@ void Joueur::update()
 	if (shootTimer > 0) 
 	    shootTimer--;
 
-	if (invincible)
+	
+	
+	
+	if (barrelRoll)					//si le joueur fait un barrel roll
 	{
+		barrelRoll = false;
+		barrelRollTimer = 30;		//temps du barrel roll
+		//invincible = true;
+		symbole = '&';
+		coolDownBarrelRoll = 75;		// cooldown du barrel roll
+	}
+	else if (invincible)		//NE MONTRE PAS LE SYMBOLE DE $ SI ININVINCILE APRES ETRE TOUCHE
+	{
+		invincible = false;
+		invincibleTimer = 50;
 		symbole = '$';
 
-		if (invincibleTimer % 50 == 0)		//le tmeps d'invincibilite
-			invincible = false;
 	}
-	else
+	else if (barrelRollTimer <= 0 && invincibleTimer <= 0)	//si le barrel roll est fini
+	{
 		symbole = '^';
+	}
 	
-	invincibleTimer++;
+	if (coolDownBarrelRoll > 0)		
+		coolDownBarrelRoll--;
+	
+	if (barrelRollTimer > 0)
+		barrelRollTimer--;
 
-	if (invincibleTimer >= 500)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
-		moveTimer = 0;
+	if (invincibleTimer > 0)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+		invincibleTimer--;
+
 }
 
-
+	
 //******************************** classe ennemi ***********************************
 
 Ennemi::Ennemi(int x, int y) : Entite(x, y, 'X', 1, 1) 
@@ -250,6 +270,47 @@ void Artilleur::update()
 	moveTimer++;
 }
 
+Zaper::Zaper(int x, int y) : Ennemi(x, y)
+{
+	shoots = true;
+	symbole = '*';
+	nbVies = 2;
+	typeEnnemi = ZAPER;
+	hauteur = 2;
+	largeur = 3;
+	shootCooldown = 1;   
+	ammoType = LASER;
+
+}
+
+void Zaper::update()
+{
+	if(posY <= HEIGHT/10 && moveTimer % 8 == 0)
+		posY++;
+
+	if (moveTimer % 25 == 0)
+	{
+		if (posX <= 1 || posX + largeur >= WIDTH - 1)
+			direction = 1 - direction; // Change de Direction
+		if (direction == 0)
+			posX -= 1;
+		else
+			posX += 1; // Bouger a gauche ou a droite
+	}
+
+	if (moveTimer % 125 == 0)   //determine le temps on et off du laser
+	{
+		if (!shoots)
+			shoots = true;
+		else if (shoots)
+			shoots = false;
+	}
+	
+	moveTimer++;
+	if (moveTimer >= 500)
+		moveTimer = 0;
+}
+
 
 //******************************** classe bullet ***********************************
 
@@ -314,6 +375,23 @@ void FragmentingBullet::update()
 	
 }
 
+Laser::Laser(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
+{
+	symbole = '~';
+	bulletType = LASER;
+	hauteur = HEIGHT - posY + 1;
+	largeur = 1;
+
+}
+
+
+void Laser::update()
+{
+	if (posY >= HEIGHT - hauteur)
+		enVie = false;
+
+}
+
 
 //******************************** classe obstacle ***********************************
 
@@ -327,5 +405,4 @@ void Obstacle::update()
     if (nbVies <= 0) 
         enVie = false;
 }
-
 

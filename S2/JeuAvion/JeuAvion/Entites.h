@@ -8,10 +8,10 @@
 using namespace std;
 
 //definit la taille du jeu
-const int WIDTH = 60;
-const int HEIGHT = 50;
+const int WIDTH = 100;
+const int HEIGHT = 40;
 enum typeEntites{JOUEUR, ENNEMI, OBSTACLE, BULLET};
-enum typeEnnemis {BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, BOSS};
+enum typeEnnemis {BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, ZAPER, BOSS};
 enum typeBullets {NORMAL, LASER, MULTIPLE, HOMING, BOMB, FRAGMENTING};
 
 class Entite 
@@ -50,9 +50,12 @@ class Joueur : public Entite
     private:
     int attkDmg;
     int vitesse;
-	
 
     public:
+	bool barrelRoll;  
+    int barrelRollTimer;
+    int coolDownBarrelRoll;
+
     Joueur(int x, int y);       //probalement autre chose a ajouter
 	void update();     //gere le deplacement du joueur
 };
@@ -102,6 +105,13 @@ class Artilleur : public Ennemi
 	void update();    //gere le deplacement de l'ennemi
 };
 
+class Zaper : public Ennemi
+{
+    public:
+	Zaper(int x, int y);
+	void update();    //gere le deplacement de l'ennemi
+};
+
 //-----------------------------------------------------------  classes Bullet -----------------------------------------------------------
 
 class Bullet : public Entite 
@@ -124,6 +134,13 @@ class FragmentingBullet : public Bullet
 {
 public:
 	FragmentingBullet(int x, int y, bool isPlayerBullet);
+	void update();    //gere le deplacement de la balle
+};
+
+class Laser : public Bullet
+{
+public:
+	Laser(int x, int y, bool isPlayerBullet);
 	void update();    //gere le deplacement de la balle
 };
 

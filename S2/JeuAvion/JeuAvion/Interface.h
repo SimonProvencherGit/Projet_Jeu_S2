@@ -23,6 +23,7 @@ class Interface
 	bool pause;
 	int posRand;     //pour la position aleatoire de l'ennemi lorsqu'il spawn
     int anciennePos;	//on garde en memoire la position de l'ennemi precedent pour eviter de le spawn a la meme position
+    
 
     public:
     Interface();
