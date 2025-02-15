@@ -77,38 +77,37 @@ void Joueur::update()
 	if (shootTimer > 0) 
 	    shootTimer--;
 
-	if (invincible && !barrelRoll)
-	{
-		symbole = '$';
-
-		if (invincibleTimer % 50 == 0)		//le tmeps d'invincibilite
-			invincible = false;
-	}
 	
-	invincibleTimer++;
-
-	if (invincibleTimer >= 500)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
-		moveTimer = 0;
-
+	
+	
 	if (barrelRoll)					//si le joueur fait un barrel roll
 	{
 		barrelRoll = false;
-		barrelRollTimer = 20;		//temps du barrel roll
-		invincible = true;
+		barrelRollTimer = 30;		//temps du barrel roll
+		//invincible = true;
 		symbole = '&';
 		coolDownBarrelRoll = 75;		// cooldown du barrel roll
 	}
-
-	if (barrelRollTimer <= 0)	//si le barrel roll est fini
+	else if (invincible)		//NE MONTRE PAS LE SYMBOLE DE $ SI ININVINCILE APRES ETRE TOUCHE
 	{
-		barrelRollTimer = 0;
-		symbole = '^';
 		invincible = false;
+		invincibleTimer = 50;
+		symbole = '$';
+
 	}
-	if (coolDownBarrelRoll >= 0)		
+	else if (barrelRollTimer <= 0 && invincibleTimer <= 0)	//si le barrel roll est fini
+	{
+		symbole = '^';
+	}
+	
+	if (coolDownBarrelRoll > 0)		
 		coolDownBarrelRoll--;
 	
-	barrelRollTimer--;
+	if (barrelRollTimer > 0)
+		barrelRollTimer--;
+
+	if (invincibleTimer > 0)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+		invincibleTimer--;
 
 }
 

@@ -22,12 +22,18 @@ void Interface :: gererInput()
     {
 
         if (GetAsyncKeyState(VK_LEFT) < 0 || GetAsyncKeyState('A') < 0)   //on verifie si la fleche gauche ou D est pressee
-            if (joueur->posX > 1)
+        {   
+            if (joueur->posX > 2)
+				joueur->posX -= 2;      //on deplace le joueur de 2 vers la gauche
+            else if (joueur->posX > 1)
                 joueur->posX--;
-
-        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState('D') < 0)
-            if (joueur->posX < WIDTH - 1)
+        }
+        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState('D') < 0) {
+            if (joueur->posX < WIDTH - 2)
+                joueur->posX += 2;
+            else if (joueur->posX < WIDTH - 1)
                 joueur->posX++;
+        }
 
         if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState('W') < 0)
             if (joueur->posY > HEIGHT / 3)      //le joueur a acces au 2/3 de l'ecran
@@ -182,7 +188,7 @@ void Interface::gererCollisions()
         {
             if (joueur->enCollision(e->posX, e->posY) && e->symbole != '^')     //on verifie si un enemi ou un bullet est entre en collision avec le joueur et verifie que e n'est pas joueur
             {
-                if (e->typeEntite == ENNEMI && e->collisionJoueur == false)
+                if (e->typeEntite == ENNEMI && e->collisionJoueur == false && joueur->barrelRollTimer <= 0)
                 {
 					joueur->perdVie(2);	 //le joueur perd 2 vies si il entre en collision avec un ennemi
 					joueur->invincible = true;     //le joueur est invincible pour un court moment apres
@@ -192,7 +198,7 @@ void Interface::gererCollisions()
                     
                     e->collisionJoueur = true;
                 }
-                else if (e->typeEntite == BULLET && e->collisionJoueur == false)     //si le joueur entre en collision avec une bullet ennemi il perd une vie
+                else if (e->typeEntite == BULLET && e->collisionJoueur == false && joueur->barrelRollTimer <= 0)     //si le joueur entre en collision avec une bullet ennemi sans etre en barrel roll il perd une vie
                 {
 					joueur->perdVie(1);    //le joueur perd 1 vie si il entre en collision avec une bullet ennemi   
 					joueur->invincible = true;     //le joueur est invincible pour un court moment apres
