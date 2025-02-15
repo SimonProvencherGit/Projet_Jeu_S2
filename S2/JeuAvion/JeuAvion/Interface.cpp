@@ -101,6 +101,10 @@ void Interface::enemySpawn(int nbEnnemi, typeEnnemis ennemiVoulu)
 			listEntites.emplace_back(make_unique<DiveBomber>(posRand, 0));
 			positionSpawnRandom();
             break;
+		case ZAPER:
+			listEntites.emplace_back(make_unique<Zaper>(posRand, 0));   
+			positionSpawnRandom();
+			break;
         }
     }
 }
@@ -125,10 +129,11 @@ void Interface::progressionDifficulte()
 
         if (enemySpawnTimer >= 100)          //on fait spawn une vague d'ennemis a toutes les 70 frames
         {
-            enemySpawn(2, BASIC);   //on fait spawn 3 ennemis a chaque vague
+            enemySpawn(3, BASIC);   //on fait spawn 3 ennemis a chaque vague
 			enemySpawn(1, DIVEBOMBER);
-			enemySpawn(1, TANK);
-			enemySpawn(1, ARTILLEUR);
+			//enemySpawn(1, TANK);
+			//enemySpawn(1, ARTILLEUR);
+			enemySpawn(2, ZAPER);
             enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
         }
     }
@@ -170,6 +175,8 @@ void Interface::updateEntites()
                                                                                                                                // eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle                                                                                                                  
             if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0)
                 bufferBullets.emplace_back(make_unique<FragmentingBullet>(e->posX + e->largeur / 2, e->posY + 1, false));
+			if (e->typeEntite == ENNEMI && e->ammoType == LASER && e->moveTimer % e->shootCooldown == 0 && e->shoots)
+				bufferBullets.emplace_back(make_unique<Laser>(e->posX + e->largeur / 2, e->posY + 1, false));
         }
     }
 	for (auto& bullet : bufferBullets) 
@@ -184,11 +191,11 @@ void Interface::gererCollisions()
 
     for (auto& e : listEntites)
     {
-        if (e->enVie)
-        {
-            if (joueur->enCollision(e->posX, e->posY) && e->symbole != '^')     //on verifie si un enemi ou un bullet est entre en collision avec le joueur et verifie que e n'est pas joueur
+        //if (e->enVie)
+        //{
+            if (e->enCollision(joueur->posX, joueur->posY) && joueur->invincibleTimer <= 0 && joueur->barrelRollTimer <= 0 && e->symbole != '^' && e->symbole != '&' && e->symbole != '$')     //on verifie si un entite entre en collision avec le joueur et verifie que e n'est pas joueur
             {
-                if (e->typeEntite == ENNEMI && e->collisionJoueur == false && joueur->barrelRollTimer <= 0)
+                if (e->typeEntite == ENNEMI && e->collisionJoueur == false)
                 {
 					joueur->perdVie(2);	 //le joueur perd 2 vies si il entre en collision avec un ennemi
 					joueur->invincible = true;     //le joueur est invincible pour un court moment apres
@@ -198,7 +205,7 @@ void Interface::gererCollisions()
                     
                     e->collisionJoueur = true;
                 }
-                else if (e->typeEntite == BULLET && e->collisionJoueur == false && joueur->barrelRollTimer <= 0)     //si le joueur entre en collision avec une bullet ennemi sans etre en barrel roll il perd une vie
+                else if (e->typeEntite == BULLET && e->collisionJoueur == false  && !e->bulletAllie)     //si le joueur entre en collision avec une bullet ennemi sans etre en barrel roll il perd une vie
                 {
 					joueur->perdVie(1);    //le joueur perd 1 vie si il entre en collision avec une bullet ennemi   
 					joueur->invincible = true;     //le joueur est invincible pour un court moment apres
@@ -210,7 +217,7 @@ void Interface::gererCollisions()
                 }
             }
 			//partie ou on gere les collision avec les bullets alliees
-			else if (e->typeEntite == BULLET && e->ammoType == joueur->ammoType && e->bulletAllie)  //on verifie si c'est un bullet allie tire par le joueur
+			else if (e->typeEntite == BULLET && e->bulletAllie)  //on verifie si c'est un bullet allie tire par le joueur
             {
 				for (auto& e2 : listEntites)	//on parcourt la liste d'entites pour voir si la bullet entre en collision avec un ennemi
                 {
@@ -218,7 +225,7 @@ void Interface::gererCollisions()
                     {
                         if (e2->enVie && e2->enCollision(e->posX, e->posY) && e2->symbole != e->symbole)       // si qqlch entre en collision avec la bullet allie et le e->symbole est pour pas que la bullet entre en collision avec elle meme 
                         {
-                            if (e2->symbole == 'o' && !e2->bulletAllie)      //si c'est un fragmenting bullet d'unennemi
+                            if (e2->ammoType == FRAGMENTING && e2->typeEntite == BULLET && !e2->bulletAllie)      //si c'est un fragmenting bullet d'unennemi
                                 for (int i = -1; i < 2; i++)	//commence a -1 pour que le premier fragment commence a la gauche de la bullet
                                     bufferBullets.emplace_back(make_unique<BasicBullet>(e2->posX+i, e2->posY + 1, false));
 
@@ -233,7 +240,7 @@ void Interface::gererCollisions()
             }
             else 
                 e->collisionJoueur = false;
-        }
+        //}
     }
     for (auto& bullet : bufferBullets)
         listEntites.push_back(move(bullet));	//on ajoute les bullets du buffer a la liste d'entites
@@ -269,11 +276,11 @@ void Interface::updateAffichage()
     {
         if (e->enVie)
         {
-            for (int y = 0; y < e->hauteur; y++)       
+			for (int y = 0; y < e->hauteur; y++)        //on parcourt la hauteur de l'entite
             {
-                for (int x = 0; x < e->largeur; x++)
+				for (int x = 0; x < e->largeur; x++)    //on parcourt la largeur de l'entite
                 {
-                    buffer[e->posY + y][e->posX + x] = e->symbole;
+					buffer[e->posY + y][e->posX + x] = e->symbole;  //on met a jour la position de l'entite dans le buffer
                 }
             }
         }

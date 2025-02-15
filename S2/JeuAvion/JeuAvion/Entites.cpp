@@ -29,7 +29,7 @@ Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 
 bool Entite::enCollision(int px, int py) 
 {
-	if (px >= posX - 1 && px <= posX + largeur + 1 && py >= posY && py < posY + hauteur)       // on fait une collision si les entites sont a la meme position (+ - 1 pour amelirer la detection)
+	if (px >= posX - 1 && px <= posX + largeur + 1 && py >= posY  && py < posY + hauteur)       // on fait une collision si les entites sont a la meme position (+ - 1 pour amelirer la detection)
         return 1;
 
     return 0;
@@ -270,6 +270,47 @@ void Artilleur::update()
 	moveTimer++;
 }
 
+Zaper::Zaper(int x, int y) : Ennemi(x, y)
+{
+	shoots = true;
+	symbole = '*';
+	nbVies = 2;
+	typeEnnemi = ZAPER;
+	hauteur = 2;
+	largeur = 3;
+	shootCooldown = 1;   
+	ammoType = LASER;
+
+}
+
+void Zaper::update()
+{
+	if(posY <= HEIGHT/10 && moveTimer % 8 == 0)
+		posY++;
+
+	if (moveTimer % 25 == 0)
+	{
+		if (posX <= 1 || posX + largeur >= WIDTH - 1)
+			direction = 1 - direction; // Change de Direction
+		if (direction == 0)
+			posX -= 1;
+		else
+			posX += 1; // Bouger a gauche ou a droite
+	}
+
+	if (moveTimer % 125 == 0)   //determine le temps on et off du laser
+	{
+		if (!shoots)
+			shoots = true;
+		else if (shoots)
+			shoots = false;
+	}
+	
+	moveTimer++;
+	if (moveTimer >= 500)
+		moveTimer = 0;
+}
+
 
 //******************************** classe bullet ***********************************
 
@@ -334,6 +375,23 @@ void FragmentingBullet::update()
 	
 }
 
+Laser::Laser(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
+{
+	symbole = '~';
+	bulletType = LASER;
+	hauteur = HEIGHT - posY + 1;
+	largeur = 1;
+
+}
+
+
+void Laser::update()
+{
+	if (posY >= HEIGHT - hauteur)
+		enVie = false;
+
+}
+
 
 //******************************** classe obstacle ***********************************
 
@@ -348,16 +406,3 @@ void Obstacle::update()
         enVie = false;
 }
 
-Laser::Laser(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
-{
-	symbole = '~';
-	bulletType = LASER;
-	hauteur = HEIGHT;
-	largeur = 1;
-
-}
-
-
-void Laser::update()
-{
-}

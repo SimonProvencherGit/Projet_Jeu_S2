@@ -11,7 +11,7 @@ using namespace std;
 const int WIDTH = 100;
 const int HEIGHT = 40;
 enum typeEntites{JOUEUR, ENNEMI, OBSTACLE, BULLET};
-enum typeEnnemis {BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, BOSS};
+enum typeEnnemis {BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, ZAPER, BOSS};
 enum typeBullets {NORMAL, LASER, MULTIPLE, HOMING, BOMB, FRAGMENTING};
 
 class Entite 
@@ -102,6 +102,13 @@ class Artilleur : public Ennemi
 {
     public:
 	Artilleur(int x, int y);
+	void update();    //gere le deplacement de l'ennemi
+};
+
+class Zaper : public Ennemi
+{
+    public:
+	Zaper(int x, int y);
 	void update();    //gere le deplacement de l'ennemi
 };
 
