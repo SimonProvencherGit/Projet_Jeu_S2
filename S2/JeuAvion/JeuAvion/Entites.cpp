@@ -45,7 +45,7 @@ void Entite::perdVie(int nbVie)
 {
 	for (int i = 0; i < nbVie; i++)     //joueur perd 2 vies si il entre en collision avec un ennemi   // pour peut ajouter un nb de degats a chaque ennemi
 	{
-		if (nbVies > 0 && enVie && !invincible)
+		if (nbVies > 0 && enVie)
 		{
 			nbVies--;
 			if (nbVies == 0)
@@ -76,9 +76,6 @@ void Joueur::update()
 
 	if (shootTimer > 0) 
 	    shootTimer--;
-
-	
-	
 	
 	if (barrelRoll)					//si le joueur fait un barrel roll
 	{
@@ -280,6 +277,7 @@ Zaper::Zaper(int x, int y) : Ennemi(x, y)
 	largeur = 3;
 	shootCooldown = 1;   
 	ammoType = LASER;
+	moveTimer = 0;		//poru qu'ils tirent tous en meme temps qd ils appaissent
 
 }
 
@@ -320,13 +318,13 @@ Bullet::Bullet(int x, int y, bool isPlayerBullet) : Entite(x, y,'|', 1, 1)
 	nbVies = 0;
 	bulletAllie = isPlayerBullet;
 	typeEntite = BULLET;
-	bulletType = NORMAL;
+	ammoType = NORMAL;
 }
 
 BasicBullet::BasicBullet(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
 {
     symbole = '|';
-    bulletType = NORMAL;
+    ammoType = NORMAL;
 	hauteur = 1;
 	largeur = 1;
     sfxx.PlaySFXAsync("basicbullet.wav");
@@ -359,7 +357,7 @@ void BasicBullet::update()
 FragmentingBullet::FragmentingBullet(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
 {
 	symbole = 'o';
-	bulletType = FRAGMENTING;
+	ammoType = FRAGMENTING;
 	hauteur = 1;
 	largeur = 2;
 	nbVies = 1;
@@ -378,9 +376,10 @@ void FragmentingBullet::update()
 Laser::Laser(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
 {
 	symbole = '~';
-	bulletType = LASER;
-	hauteur = HEIGHT - posY + 1;
+	ammoType = LASER;
 	largeur = 1;
+	if (!isPlayerBullet)
+		hauteur = HEIGHT - posY + 1;
 
 }
 

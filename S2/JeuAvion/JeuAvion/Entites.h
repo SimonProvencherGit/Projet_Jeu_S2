@@ -117,7 +117,6 @@ class Zaper : public Ennemi
 class Bullet : public Entite 
 {
     public:
-	typeBullets bulletType;
 
     Bullet(int x, int y, bool isPlayerBullet);
 	virtual void update() = 0;   //gere le deplacement de la balle dependant de qui l'a tire on donne la pos x, y du joueur pour les bullets a tete chercheuse

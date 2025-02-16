@@ -129,11 +129,11 @@ void Interface::progressionDifficulte()
 
         if (enemySpawnTimer >= 100)          //on fait spawn une vague d'ennemis a toutes les 70 frames
         {
-            enemySpawn(3, BASIC);   //on fait spawn 3 ennemis a chaque vague
+            //enemySpawn(2, BASIC);   //on fait spawn 3 ennemis a chaque vague
 			enemySpawn(1, DIVEBOMBER);
 			//enemySpawn(1, TANK);
-			//enemySpawn(1, ARTILLEUR);
-			enemySpawn(2, ZAPER);
+			enemySpawn(1, ARTILLEUR);
+			enemySpawn(1, ZAPER);
             enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
         }
     }
@@ -150,7 +150,7 @@ void Interface::progressionDifficulte()
 	{
 		if (enemySpawnTimer >= 40)          //on fait spawn une vague d'ennemis a toutes les 50 frames
 		{
-			enemySpawn(3, ARTILLEUR);   
+			enemySpawn(2, ARTILLEUR);   
 			//enemySpawn(4, BASIC);   //on fait spawn 5 ennemis a chaque vague
             enemySpawn(2, DIVEBOMBER);
 			enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
@@ -171,11 +171,12 @@ void Interface::updateEntites()
 			e->update();    //on met a jour l'entite
 
             if (e->typeEntite == ENNEMI && e->ammoType == NORMAL && e->moveTimer % e->shootCooldown == 0 && e->shoots)    //on verifie si c'est un ennemi et si sont compteur pour tirer est a 0
-                bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX + e->largeur / 2, e->posY + 1, false));           //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour 
-                                                                                                                               // eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle                                                                                                                  
+                bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX + e->largeur / 2, e->posY + 1, false));     //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle  
+                                                                                                                                                                                                                                            
             if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0)
                 bufferBullets.emplace_back(make_unique<FragmentingBullet>(e->posX + e->largeur / 2, e->posY + 1, false));
-			if (e->typeEntite == ENNEMI && e->ammoType == LASER && e->moveTimer % e->shootCooldown == 0 && e->shoots)
+			
+            if (e->typeEntite == ENNEMI && e->ammoType == LASER && e->moveTimer % e->shootCooldown == 0 && e->shoots)
 				bufferBullets.emplace_back(make_unique<Laser>(e->posX + e->largeur / 2, e->posY + 1, false));
         }
     }
@@ -225,7 +226,7 @@ void Interface::gererCollisions()
                     {
                         if (e2->enVie && e2->enCollision(e->posX, e->posY) && e2->symbole != e->symbole)       // si qqlch entre en collision avec la bullet allie et le e->symbole est pour pas que la bullet entre en collision avec elle meme 
                         {
-                            if (e2->ammoType == FRAGMENTING && e2->typeEntite == BULLET && !e2->bulletAllie)      //si c'est un fragmenting bullet d'unennemi
+                             if (e2->ammoType == FRAGMENTING && e2->typeEntite == BULLET && !e2->bulletAllie)      //si c'est un fragmenting bullet d'unennemi
                                 for (int i = -1; i < 2; i++)	//commence a -1 pour que le premier fragment commence a la gauche de la bullet
                                     bufferBullets.emplace_back(make_unique<BasicBullet>(e2->posX+i, e2->posY + 1, false));
 
