@@ -23,6 +23,7 @@ Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 	ammoType = NORMAL;
 	invincible = false;
 	invincibleTimer = 0;
+	isPlayer = false;
 }
 
 
@@ -68,6 +69,7 @@ Joueur::Joueur(int x, int y) : Entite(x, y, '^', 1, 1)  //on set les valeurs par
 	barrelRollTimer = 0;
 	barrelRoll = false;
 	coolDownBarrelRoll = 0;
+	isPlayer = true;
 }
 
 
@@ -83,7 +85,7 @@ void Joueur::update()
 		barrelRollTimer = 30;		//temps du barrel roll
 		//invincible = true;
 		symbole = '&';
-		coolDownBarrelRoll = 75;		// cooldown du barrel roll
+		coolDownBarrelRoll = CD_BARRELROLL;		// cooldown du barrel roll
 	}
 	else if (invincible)		//NE MONTRE PAS LE SYMBOLE DE $ SI ININVINCILE APRES ETRE TOUCHE
 	{
