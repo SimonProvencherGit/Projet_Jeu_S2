@@ -9,6 +9,10 @@ Interface :: Interface()
 	pause = false;
     posRand = 0;
 	anciennePos = 0;
+	explosionTimer = 0;
+	enExplosion = false;
+	explosionPosY = 0;
+	cdExplosion = 0;
 
     listEntites.emplace_back(make_unique<Joueur>(WIDTH / 2, HEIGHT - 1));   //ajoute le joueur a la liste d'entites
 	joueur = static_cast<Joueur*>(listEntites.back().get());                //on recupere le * du joueur de la liste d'entites
@@ -16,15 +20,15 @@ Interface :: Interface()
 
 
 //gere les inputs du joueur
-void Interface :: gererInput()
+void Interface::gererInput()
 {
     if (pause == false)
     {
 
         if (GetAsyncKeyState(VK_LEFT) < 0 || GetAsyncKeyState('A') < 0)   //on verifie si la fleche gauche ou D est pressee
-        {   
+        {
             if (joueur->posX > 2)
-				joueur->posX -= 2;      //on deplace le joueur de 2 vers la gauche
+                joueur->posX -= 2;      //on deplace le joueur de 2 vers la gauche
             else if (joueur->posX > 1)
                 joueur->posX--;
         }
@@ -52,9 +56,26 @@ void Interface :: gererInput()
         }
         if (GetAsyncKeyState('E') < 0)
         {
-			if (joueur->barrelRoll == false && joueur->coolDownBarrelRoll <= 0)
-			    joueur->barrelRoll = true;
+            if (joueur->barrelRoll == false && joueur->coolDownBarrelRoll <= 0)
+                joueur->barrelRoll = true;
         }
+        if (GetAsyncKeyState('R') < 0)
+        {
+            if (explosionTimer == 0) 
+            {
+
+                cdExplosion = 500;      //set le cooldown de l'explosion
+                enExplosion = true;
+                explosionTimer = cdExplosion;
+                explosionPosY = joueur->posY - 1;
+            }
+        }
+    }
+
+    if (explosionTimer > 0)
+    {
+        explosionTimer--;
+        explosion();
     }
 
     if (GetAsyncKeyState('Q') < 0) 
@@ -68,6 +89,28 @@ void Interface :: gererInput()
             pause = true;
 		Sleep(200);
     }
+}
+
+
+void Interface::explosion()
+{
+
+    if (enExplosion)
+    {
+		for (auto& e : listEntites)
+		{
+			if (e->enVie && e->posY >= explosionPosY - 2 && e->posY <= explosionPosY + 2 && !e->isPlayer)	//on verifie si l'entite est dans une zone d'explosion qui avance vers le haut de l'ecran
+			{
+				e->enVie = false;
+				score += 10;
+			}
+		}
+    }
+
+    if(explosionPosY > 0)
+	    explosionPosY--;
+	else 
+        enExplosion = false;
 }
 
 
@@ -129,11 +172,11 @@ void Interface::progressionDifficulte()
 
         if (enemySpawnTimer >= 100)          //on fait spawn une vague d'ennemis a toutes les 70 frames
         {
-            enemySpawn(3, BASIC);   //on fait spawn 3 ennemis a chaque vague
+            enemySpawn(2, BASIC);   //on fait spawn 3 ennemis a chaque vague
 			enemySpawn(1, DIVEBOMBER);
 			//enemySpawn(1, TANK);
-			//enemySpawn(1, ARTILLEUR);
-			enemySpawn(2, ZAPER);
+			enemySpawn(1, ARTILLEUR);
+			//enemySpawn(1, ZAPER);
             enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
         }
     }
@@ -150,13 +193,14 @@ void Interface::progressionDifficulte()
 	{
 		if (enemySpawnTimer >= 40)          //on fait spawn une vague d'ennemis a toutes les 50 frames
 		{
-			enemySpawn(3, ARTILLEUR);   
+			enemySpawn(2, ARTILLEUR);   
 			//enemySpawn(4, BASIC);   //on fait spawn 5 ennemis a chaque vague
             enemySpawn(2, DIVEBOMBER);
 			enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
 		}
 	}
 }
+
 
 //met a jour les entites a chaque frame
 void Interface::updateEntites()
@@ -171,11 +215,12 @@ void Interface::updateEntites()
 			e->update();    //on met a jour l'entite
 
             if (e->typeEntite == ENNEMI && e->ammoType == NORMAL && e->moveTimer % e->shootCooldown == 0 && e->shoots)    //on verifie si c'est un ennemi et si sont compteur pour tirer est a 0
-                bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX + e->largeur / 2, e->posY + 1, false));           //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour 
-                                                                                                                               // eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle                                                                                                                  
+                bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX + e->largeur / 2, e->posY + 1, false));     //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle  
+                                                                                                                                                                                                                                            
             if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0)
                 bufferBullets.emplace_back(make_unique<FragmentingBullet>(e->posX + e->largeur / 2, e->posY + 1, false));
-			if (e->typeEntite == ENNEMI && e->ammoType == LASER && e->moveTimer % e->shootCooldown == 0 && e->shoots)
+			
+            if (e->typeEntite == ENNEMI && e->ammoType == LASER && e->moveTimer % e->shootCooldown == 0 && e->shoots)
 				bufferBullets.emplace_back(make_unique<Laser>(e->posX + e->largeur / 2, e->posY + 1, false));
         }
     }
@@ -193,7 +238,7 @@ void Interface::gererCollisions()
     {
         //if (e->enVie)
         //{
-            if (e->enCollision(joueur->posX, joueur->posY) && joueur->invincibleTimer <= 0 && joueur->barrelRollTimer <= 0 && e->symbole != '^' && e->symbole != '&' && e->symbole != '$')     //on verifie si un entite entre en collision avec le joueur et verifie que e n'est pas joueur
+            if (e->enCollision(joueur->posX, joueur->posY) && joueur->invincibleTimer <= 0 && joueur->barrelRollTimer <= 0 && !e->isPlayer)     //on verifie si un entite entre en collision avec le joueur et verifie que e n'est pas joueur
             {
                 if (e->typeEntite == ENNEMI && e->collisionJoueur == false)
                 {
@@ -225,7 +270,7 @@ void Interface::gererCollisions()
                     {
                         if (e2->enVie && e2->enCollision(e->posX, e->posY) && e2->symbole != e->symbole)       // si qqlch entre en collision avec la bullet allie et le e->symbole est pour pas que la bullet entre en collision avec elle meme 
                         {
-                            if (e2->ammoType == FRAGMENTING && e2->typeEntite == BULLET && !e2->bulletAllie)      //si c'est un fragmenting bullet d'unennemi
+                             if (e2->ammoType == FRAGMENTING && e2->typeEntite == BULLET && !e2->bulletAllie)      //si c'est un fragmenting bullet d'unennemi
                                 for (int i = -1; i < 2; i++)	//commence a -1 pour que le premier fragment commence a la gauche de la bullet
                                     bufferBullets.emplace_back(make_unique<BasicBullet>(e2->posX+i, e2->posY + 1, false));
 
@@ -250,14 +295,29 @@ void Interface::gererCollisions()
 //met a jour l'affichage de la console 
 void Interface::updateAffichage()
 {
-	wchar_t buffer[HEIGHT + 3][WIDTH + 2];  // +3 pour les bordures et le score, +2 pour les bordures
+	wchar_t buffer[HEIGHT + 4][WIDTH + 2];  // +3 pour les bordures et le score, +2 pour les bordures
+    wchar_t progressExplosion[12];	//buffer pour afficher progression de l'explosion
+    wchar_t progressBarrelRoll[12];	//buffer pour afficher progression du barrel roll
+	float nbSymboleExplosion = 0;  //pour le nombre de symboles a afficher dans la progression de l'explosion
+    float nbSymboleBarrelRoll = 0;  
+	wstring texte;  //on cree un string pour afficher le score, le nombre de vies et autres textes
+    
 
     // Remplir le tampon avec des espaces (effacer l'écran)
-    for (int y = 0; y < HEIGHT + 3; y++) {
+    for (int y = 0; y < HEIGHT + 4; y++) {
         for (int x = 0; x < WIDTH + 2; x++) {
             buffer[y][x] = L' ';
         }
     }
+
+	//rempli le buffer progressexplosion avec des espaces
+	for (int i = 0; i < 12; i++)
+		progressExplosion[i] = L' ';
+
+	//rempli le buffer progressBarrelRoll avec des espaces
+	for (int i = 0; i < 12; i++)
+		progressBarrelRoll[i] = L' ';
+
 
     // Mettre à jour les bordures
 	for (int x = 0; x < WIDTH + 2; x++)     //on met les bordures du haut et du bas
@@ -286,20 +346,63 @@ void Interface::updateAffichage()
         }
     }
 
-	wstring scoreText;  //on cree un string pour le score
+    //Affiche progression pour l'explosion
+	progressExplosion[0] = L'[';
+	progressExplosion[11] = L']';
 
-    if (gameOver)
-        scoreText = L"Game Over!  Score: " + to_wstring(score);
+    if (explosionTimer == 0)
+        nbSymboleExplosion = 10;
     else
-        scoreText = L"Score: " + to_wstring(score) + L"   Lives: " + to_wstring(joueur->nbVies);
+        nbSymboleExplosion = ((float)(cdExplosion - explosionTimer) / (float)cdExplosion) * 10;
 
-	for (size_t i = 0; i < scoreText.size(); i++)   //on ajoute le score au buffer
-        buffer[HEIGHT + 2][i] = scoreText[i];
+	for (int i = 0; i < (int)nbSymboleExplosion; i++)
+        progressExplosion[i+1] = L'#';
+
+	texte = L"Explosion: ";
+	for (int i = 0; i < texte.size(); i++)   //on ajoute le score au buffer
+		buffer[HEIGHT + 2][i] = texte[i];
+   
+    for (int i = 0; i < 12; i++)
+        buffer[HEIGHT + 2][i + texte.size()] = progressExplosion[i];
+
+	//Affiche progression pour le barrel roll
+	progressBarrelRoll[0] = L'[';
+	progressBarrelRoll[11] = L']';
+	int posCurseur = 12 + texte.size() + 5;
+
+	if (joueur->coolDownBarrelRoll == 0)
+        nbSymboleBarrelRoll = 10;
+    else 
+    {
+        nbSymboleBarrelRoll = ((float)(CD_BARRELROLL - joueur->coolDownBarrelRoll) / (float)CD_BARRELROLL) * 10;
+		if (nbSymboleBarrelRoll > 10)
+			nbSymboleBarrelRoll = 10;
+    }
+
+	for (int i = 0; i < (int)nbSymboleBarrelRoll; i++)
+		progressBarrelRoll[i + 1] = L'#';
+
+	texte = L"Barrel Roll: ";
+	for (int i = 0; i < texte.size(); i++)   //on ajoute le score au buffer
+		buffer[HEIGHT + 2][i + posCurseur] = texte[i];
+
+	for (int i = 0; i < 12; i++)
+		buffer[HEIGHT + 2][i + texte.size() + posCurseur] = progressBarrelRoll[i];
+
+    
+    // Afficher le score
+    if (gameOver)
+        texte = L"Game Over!  Score: " + to_wstring(score);
+    else
+        texte = L"Score: " + to_wstring(score) + L"   Lives: " + to_wstring(joueur->nbVies);
+
+	for (size_t i = 0; i < texte.size(); i++)   //on ajoute le score au buffer
+        buffer[HEIGHT + 3][i] = texte[i];
     
 
 	// on affiche chaque ligne du buffer
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    for (int y = 0; y < HEIGHT + 3; y++) 
+    for (int y = 0; y < HEIGHT + 4; y++) 
     {
         COORD bufferCoord = { 0, static_cast<SHORT>(y) };
         DWORD charsWritten;

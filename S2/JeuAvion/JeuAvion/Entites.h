@@ -10,6 +10,8 @@ using namespace std;
 //definit la taille du jeu
 const int WIDTH = 100;
 const int HEIGHT = 40;
+const int CD_BARRELROLL = 75;
+
 enum typeEntites{JOUEUR, ENNEMI, OBSTACLE, BULLET};
 enum typeEnnemis {BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, ZAPER, BOSS};
 enum typeBullets {NORMAL, LASER, MULTIPLE, HOMING, BOMB, FRAGMENTING};
@@ -35,6 +37,7 @@ class Entite
     bool shoots;
     bool invincible;
 	int invincibleTimer;
+    bool isPlayer;
 
     Entite(int x, int y, char symb, int longueurEntite, int largeurEntite);
     virtual void update() = 0;
@@ -117,7 +120,6 @@ class Zaper : public Ennemi
 class Bullet : public Entite 
 {
     public:
-	typeBullets bulletType;
 
     Bullet(int x, int y, bool isPlayerBullet);
 	virtual void update() = 0;   //gere le deplacement de la balle dependant de qui l'a tire on donne la pos x, y du joueur pour les bullets a tete chercheuse
