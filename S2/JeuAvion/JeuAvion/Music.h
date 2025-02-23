@@ -8,12 +8,11 @@ class Music {
 public:
     Music();
     ~Music();
-
+    void StopMusic();
     void PlayMusicWithVolumeControl(LPCSTR lpszSound);
     void SetVolumeFadeout(int volume);
     void SetVolume(int volume);
     void PlayMusicAsync(LPCSTR lpszSound);
-
 private:
     HWAVEOUT hWaveOut;
     int volume = 50;

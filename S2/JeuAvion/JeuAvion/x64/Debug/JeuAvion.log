@@ -1,3 +1,10 @@
-﻿  Interface.cpp
-C:\Users\Siméon\Documents\Ecole\Uni\GitJeuS2\Projet_Jeu_S2\S2\JeuAvion\JeuAvion\Interface.cpp(371,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  JeuAvion.vcxproj -> C:\Users\Siméon\Documents\Ecole\Uni\GitJeuS2\Projet_Jeu_S2\S2\JeuAvion\x64\Debug\JeuAvion.exe
+﻿  Entites.cpp
+  Interface.cpp
+C:\Users\amran\CLionProjects\Projet_Jeu\S2\JeuAvion\JeuAvion\Interface.cpp(371,17): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  JeuAvion.cpp
+  Music.cpp
+  Generating Code...
+  LINK : C:\Users\amran\CLionProjects\Projet_Jeu\S2\JeuAvion\x64\Debug\JeuAvion.exe not found or not built by the last incremental link; performing full link
+  JeuAvion.vcxproj -> C:\Users\amran\CLionProjects\Projet_Jeu\S2\JeuAvion\x64\Debug\JeuAvion.exe
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.
