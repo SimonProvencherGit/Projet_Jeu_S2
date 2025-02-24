@@ -27,6 +27,7 @@ class Interface
     int explosionPosY;
     bool enExplosion;
     int cdExplosion;
+	bool bossSpawned;
 
     public:
     Interface();

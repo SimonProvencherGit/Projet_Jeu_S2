@@ -13,7 +13,6 @@ class SFX {
 public:
     SFX();
     ~SFX();
-    void PlaySFXWithVolumeControl(LPCSTR lpszSound);
     void PlaySFXAsync(LPCSTR lpszSound);
 
 private:

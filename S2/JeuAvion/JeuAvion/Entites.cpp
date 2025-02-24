@@ -1,5 +1,5 @@
 #include "Entites.h"
-SFX sfxx;        //explication a mettre ici
+//SFX sfxx;        //explication a mettre ici
 
 Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 {
@@ -46,7 +46,7 @@ void Entite::perdVie(int nbVie)
 {
 	for (int i = 0; i < nbVie; i++)     //joueur perd 2 vies si il entre en collision avec un ennemi   // pour peut ajouter un nb de degats a chaque ennemi
 	{
-		if (nbVies > 0 && enVie)
+		if (nbVies > 0 && enVie && !invincible)
 		{
 			nbVies--;
 			if (nbVies == 0)
@@ -279,7 +279,7 @@ Zaper::Zaper(int x, int y) : Ennemi(x, y)
 	largeur = 3;
 	shootCooldown = 1;   
 	ammoType = LASER;
-	moveTimer = 0;		//poru qu'ils tirent tous en meme temps qd ils appaissent
+	//moveTimer = 0;		//poru qu'ils tirent tous en meme temps qd ils appaissent
 
 }
 
@@ -311,6 +311,93 @@ void Zaper::update()
 		moveTimer = 0;
 }
 
+Boss1::Boss1(int x, int y) : Ennemi(x, y)
+{
+	symbole = 'B';
+	nbVies = 75;
+	typeEnnemi = BOSS1_MAIN;
+	typeEntite = BOSS;
+	ammoType = HOMING;
+	hauteur = 8;
+	largeur = 15;
+	shootCooldown = 50;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
+	shoots = true;
+}
+
+void Boss1::update()
+{
+	if (moveTimer % 5 == 0)
+	{
+		if (posY <= HEIGHT / 15)
+			posY++;
+	}
+	if (moveTimer % 20 == 0)
+	{
+		if (posX <= 1 || posX + largeur >= WIDTH - 1)
+			direction = 1 - direction; // Change de Direction
+		if (direction == 0)
+			posX -= 1;
+		else
+			posX += 1; // Bouger a gauche ou a droite
+	}
+	if (moveTimer >= 100)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+		moveTimer = 0;
+	moveTimer++;
+}
+
+Boss1Side::Boss1Side(int x, int y) : Ennemi(x, y)
+{
+	symbole = 'B';
+	nbVies = 45;
+	typeEntite = BOSS;
+	typeEnnemi = BOSS1_SIDE;
+	hauteur = 3;
+	largeur = 8;
+	//shoots = true;
+	shootCooldown = 1;
+	ammoType = LASER;
+	
+	if ((rand() % 3) == 0)		//pour que les side boss side tirent a des moments differents cahque foais qu'il spawn
+		shoots = true;
+	else
+		shoots = false;
+
+}	
+
+
+void Boss1Side::update()
+{
+	if (moveTimer % 5 == 0)
+	{
+		if (posY <= 13)
+			posY++;
+	}
+
+	if (moveTimer % 2 == 0)         //a toute les 5 update on peut bouger en X 
+	{
+		if (posX <= 1 || posX + largeur >= WIDTH - 1)
+			direction = 1 - direction; // Change de Direction
+
+		// Bouger a gauche ou a droite
+		if (direction == 0)
+			posX -= 1;
+		else
+			posX += 1; 
+	}
+
+	if (moveTimer % 125 == 0)   //determine le temps on et off du laser
+	{
+		if (!shoots)
+			shoots = true;
+		else if (shoots)
+			shoots = false;
+	}
+
+	if (moveTimer >= 500)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+		moveTimer = 0;
+
+	moveTimer++;
+}
 
 //******************************** classe bullet ***********************************
 
@@ -329,7 +416,7 @@ BasicBullet::BasicBullet(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPla
     ammoType = NORMAL;
 	hauteur = 1;
 	largeur = 1;
-    sfxx.PlaySFXAsync("basicbullet.wav");
+   // sfxx.PlaySFXAsync("basicbullet.wav");
 }
 
 void BasicBullet::update()
@@ -393,6 +480,34 @@ void Laser::update()
 
 }
 
+Homing::Homing(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
+{
+	symbole = 'V';
+	ammoType = HOMING;
+	hauteur = 2;
+	largeur = 1;
+	nbVies = 2;
+}
+
+void Homing::update()
+{
+	if (moveTimer % 1 == 0)         //on peut ajuster la vitesse en x du missile
+	{
+		if (posX < xJoueur)
+			posX++;
+		else if (posX > xJoueur)
+			posX--;
+	}
+	if (moveTimer % 1 == 0)         //on peut ajuster la vitesse du missile
+	{
+		posY++;
+	}
+	if (moveTimer >= 100)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+		moveTimer = 0;
+	if (posY >= HEIGHT)     //si le missile atteint le bas de l'ecran is meurt
+		enVie = false;
+	moveTimer++;
+}
 
 //******************************** classe obstacle ***********************************
 
@@ -406,4 +521,5 @@ void Obstacle::update()
     if (nbVies <= 0) 
         enVie = false;
 }
+
 

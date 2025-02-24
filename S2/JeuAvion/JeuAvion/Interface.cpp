@@ -13,6 +13,7 @@ Interface :: Interface()
 	enExplosion = false;
 	explosionPosY = 0;
 	cdExplosion = 0;
+	bossSpawned = false;
 
     listEntites.emplace_back(make_unique<Joueur>(WIDTH / 2, HEIGHT - 1));   //ajoute le joueur a la liste d'entites
 	joueur = static_cast<Joueur*>(listEntites.back().get());                //on recupere le * du joueur de la liste d'entites
@@ -99,7 +100,7 @@ void Interface::explosion()
     {
 		for (auto& e : listEntites)
 		{
-			if (e->enVie && e->posY >= explosionPosY - 2 && e->posY <= explosionPosY + 2 && !e->isPlayer)	//on verifie si l'entite est dans une zone d'explosion qui avance vers le haut de l'ecran
+			if (e->enVie && e->posY >= explosionPosY - 2 && e->posY <= explosionPosY + 2 && !e->isPlayer && e->typeEntite != BOSS)	//on verifie si l'entite est dans une zone d'explosion qui avance vers le haut de l'ecran
 			{
 				e->enVie = false;
 				score += 10;
@@ -121,35 +122,41 @@ void Interface::enemySpawn(int nbEnnemi, typeEnnemis ennemiVoulu)
    
     for (int i = 0; i < nbEnnemi; i++)  //on fait spawn un nombre d'ennemis egal a nbEnnemi
     {
-		anciennePos = posRand;
+		//anciennePos = posRand;
 
         switch (ennemiVoulu)
         {
-        case BASIC:
-            listEntites.emplace_back(make_unique<BasicEnnemi>(posRand, 0));
-			positionSpawnRandom();    
-            break;
-        case RAPIDE:
-            //listEntites.emplace_back(make_unique<RapideEnnemi>(posRand, 0));
-            break;
-        case TANK:
-            listEntites.emplace_back(make_unique<Tank>(posRand, 0));
-            positionSpawnRandom();
-            break;
-        case ARTILLEUR:
-            listEntites.emplace_back(make_unique<Artilleur>(posRand, 0));
-			positionSpawnRandom();
-            break;
-        case DIVEBOMBER:
-			listEntites.emplace_back(make_unique<DiveBomber>(posRand, 0));
-			positionSpawnRandom();
-            break;
-		case ZAPER:
-			listEntites.emplace_back(make_unique<Zaper>(posRand, 0));   
-			positionSpawnRandom();
-			break;
+            case BASIC:
+                listEntites.emplace_back(make_unique<BasicEnnemi>(posRand, 0));
+			    positionSpawnRandom();    
+                break;
+            case RAPIDE:
+                //listEntites.emplace_back(make_unique<RapideEnnemi>(posRand, 0));
+                break;
+            case TANK:
+                listEntites.emplace_back(make_unique<Tank>(posRand, 0));
+                positionSpawnRandom();
+                break;
+            case ARTILLEUR:
+                listEntites.emplace_back(make_unique<Artilleur>(posRand, 0));
+			    positionSpawnRandom();
+                break;
+            case DIVEBOMBER:
+			    listEntites.emplace_back(make_unique<DiveBomber>(posRand, 0));
+			    positionSpawnRandom();
+                break;
+		    case ZAPER:
+			    listEntites.emplace_back(make_unique<Zaper>(posRand, 0));   
+			    positionSpawnRandom();
+			    break;
+			case BOSS1_MAIN:
+                listEntites.emplace_back(make_unique<Boss1>(WIDTH / 3, 0));
+				listEntites.emplace_back(make_unique<Boss1Side>(WIDTH - WIDTH/6, 4));
+                listEntites.emplace_back(make_unique<Boss1Side>(WIDTH / 6, 4));
+                listEntites.emplace_back(make_unique<Boss1Side>(WIDTH / 2, 4));
+				break;
         }
-    }
+    }   
 }
 
 void Interface::positionSpawnRandom()       //on donne une position aleatoire a l'ennemi au spawn en evitant qu'il spawn avec une partie de lui hors de l'ecran
@@ -169,7 +176,7 @@ void Interface::progressionDifficulte()
 	            // ******** je devrais probablement remplacer ca par des modulo du enemy spawn timer et remettre le compteur a 0 qd il est a une grande valeur  ********               
     if (score < 300)
     {
-
+       
         if (enemySpawnTimer >= 100)          //on fait spawn une vague d'ennemis a toutes les 70 frames
         {
             enemySpawn(2, BASIC);   //on fait spawn 3 ennemis a chaque vague
@@ -177,6 +184,7 @@ void Interface::progressionDifficulte()
 			//enemySpawn(1, TANK);
 			enemySpawn(1, ARTILLEUR);
 			//enemySpawn(1, ZAPER);
+            
             enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
         }
     }
@@ -189,7 +197,7 @@ void Interface::progressionDifficulte()
 			enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
 		}
 	}
-	if (score >= 600)
+	if (score >= 600 && score < 1000)
 	{
 		if (enemySpawnTimer >= 40)          //on fait spawn une vague d'ennemis a toutes les 50 frames
 		{
@@ -198,6 +206,20 @@ void Interface::progressionDifficulte()
             enemySpawn(2, DIVEBOMBER);
 			enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
 		}
+	}
+	if (score >= 1000 && !bossSpawned)
+	{
+		/*bool allEnnemiDead = true;
+		for (auto& e : listEntites)
+		{
+			if (e->enVie = true && e->typeEntite == ENNEMI)
+				allEnnemiDead = false;
+		}*/
+        //if (allEnnemiDead) 
+        //{
+            enemySpawn(1, BOSS1_MAIN);
+            bossSpawned = true;
+       // }
 	}
 }
 
@@ -215,13 +237,33 @@ void Interface::updateEntites()
 			e->update();    //on met a jour l'entite
 
             if (e->typeEntite == ENNEMI && e->ammoType == NORMAL && e->moveTimer % e->shootCooldown == 0 && e->shoots)    //on verifie si c'est un ennemi et si sont compteur pour tirer est a 0
-                bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX + e->largeur / 2, e->posY + 1, false));     //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle  
+                bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX + e->largeur / 2, e->posY + e->hauteur + 1, false));     //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle  
                                                                                                                                                                                                                                             
-            if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0)
-                bufferBullets.emplace_back(make_unique<FragmentingBullet>(e->posX + e->largeur / 2, e->posY + 1, false));
+            if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0 && e->shoots)
+                bufferBullets.emplace_back(make_unique<FragmentingBullet>(e->posX + e->largeur / 2, e->posY + e->hauteur + 1, false));
 			
-            if (e->typeEntite == ENNEMI && e->ammoType == LASER && e->moveTimer % e->shootCooldown == 0 && e->shoots)
-				bufferBullets.emplace_back(make_unique<Laser>(e->posX + e->largeur / 2, e->posY + 1, false));
+            if ((e->typeEntite == ENNEMI || e->typeEntite == BOSS) && e->ammoType == LASER && e->moveTimer % e->shootCooldown == 0 && e->shoots)
+				bufferBullets.emplace_back(make_unique<Laser>(e->posX + e->largeur / 2, e->posY + e->hauteur + 1, false));
+
+            if (e->typeEntite == BOSS && e->ammoType == HOMING && e->moveTimer % e->shootCooldown == 0 && e->shoots) 
+            {
+                bufferBullets.emplace_back(make_unique<Homing>(e->posX + e->largeur / 4, e->posY + e->hauteur + 1, false));
+                bufferBullets.emplace_back(make_unique<Homing>(e->posX + e->largeur - e->largeur/ 4, e->posY + e->hauteur + 1, false));
+                bufferBullets.emplace_back(make_unique<Homing>(e->posX + e->largeur / 2, e->posY + e->hauteur + 1, false));
+            }
+
+            if (e->typeEntite == BOSS && e->ammoType == HOMING)
+            {
+				e->invincible = false;
+
+				for (auto& e2 : listEntites)
+				{
+                    if (e2->enVie == true && e2->typeEntite == BOSS && e2->ammoType == LASER)
+                    {
+						e->invincible = true;
+                    }
+				}
+            }
         }
     }
 	for (auto& bullet : bufferBullets) 
@@ -447,7 +489,7 @@ void Interface :: executionJeu()
             Sleep(25);
 
     }
-	Sleep(2500);
+	Sleep(1500);
     showCursor();
 }
 

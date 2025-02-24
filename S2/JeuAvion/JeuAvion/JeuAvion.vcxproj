@@ -70,6 +70,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64); $(ProjectDir)/SFX/lib</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -132,7 +135,6 @@
     <ClCompile Include="Interface.cpp" />
     <ClCompile Include="JeuAvion.cpp" />
     <ClCompile Include="Music.cpp" />
-    <ClCompile Include="SFX.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entites.h" />

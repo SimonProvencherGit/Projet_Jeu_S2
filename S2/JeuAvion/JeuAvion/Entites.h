@@ -3,7 +3,7 @@
 
 #include <windows.h>    //pour le curseur de la console et sleep()
 //#include "Interface.h"
-#include "SFX.h"
+//#include "SFX.h"
 
 using namespace std;
 
@@ -12,8 +12,8 @@ const int WIDTH = 100;
 const int HEIGHT = 40;
 const int CD_BARRELROLL = 75;
 
-enum typeEntites{JOUEUR, ENNEMI, OBSTACLE, BULLET};
-enum typeEnnemis {BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, ZAPER, BOSS};
+enum typeEntites{JOUEUR, ENNEMI, OBSTACLE, BULLET, BOSS};
+enum typeEnnemis { BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, ZAPER, BOSS1_MAIN, BOSS1_SIDE };
 enum typeBullets {NORMAL, LASER, MULTIPLE, HOMING, BOMB, FRAGMENTING};
 
 class Entite 
@@ -115,6 +115,20 @@ class Zaper : public Ennemi
 	void update();    //gere le deplacement de l'ennemi
 };
 
+class Boss1 : public Ennemi
+{
+    public:
+    Boss1(int x, int y);
+	void update();    //gere le deplacement de l'ennemi
+};
+
+class Boss1Side : public Ennemi
+{
+    public:
+	Boss1Side(int x, int y);
+	void update();    //gere le deplacement de l'ennemi
+};
+
 //-----------------------------------------------------------  classes Bullet -----------------------------------------------------------
 
 class Bullet : public Entite 
@@ -145,6 +159,14 @@ public:
 	Laser(int x, int y, bool isPlayerBullet);
 	void update();    //gere le deplacement de la balle
 };
+
+class Homing : public Bullet
+{
+    public:
+	Homing(int x, int y, bool isPlayerBullet);
+	void update();    //gere le deplacement de la balle
+};
+
 
 //-----------------------------------------------------------  classes Obstacle -----------------------------------------------------------
 
