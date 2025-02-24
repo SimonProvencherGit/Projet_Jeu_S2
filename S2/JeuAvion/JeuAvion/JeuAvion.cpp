@@ -8,9 +8,11 @@
 
 int main() {
     Music music;
+	
     SFX sfx;
+    sfx.setVolume(100);
     music.SetVolume(3);
-    music.PlayMusicAsync("mainmenu.wav");
+    //music.PlayMusicAsync("mainmenu.wav");
     printf("Press Enter To Start");
     std::cin.get();
     sfx.PlaySFXAsync("pling.wav");

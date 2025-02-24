@@ -4,19 +4,19 @@ SFX sfxx;        //explication a mettre ici
 Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 {
 	//donne des valeurs par defaut aux variables qui vont etre redefinies dans les classes enfant
-    posX = x;
-    posY = y;
+	posX = x;
+	posY = y;
 	hauteur = hauteurEntite;
 	largeur = largeurEntite;
-    symbole = symb;
-    enVie = true;
-    collisionJoueur = false;
-    shootCooldown = -1;
-    shootTimer = -1;
-    moveTimer = 0;
+	symbole = symb;
+	enVie = true;
+	collisionJoueur = false;
+	shootCooldown = -1;
+	shootTimer = -1;
+	moveTimer = 0;
 	nbVies = 1;
-    bulletAllie = false;
-	typeEntite = ENNEMI;      
+	bulletAllie = false;
+	typeEntite = ENNEMI;
 	xJoueur = 0;
 	yJoueur = 0;
 	shoots = true;
@@ -28,12 +28,12 @@ Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 
 
 
-bool Entite::enCollision(int px, int py) 
+bool Entite::enCollision(int px, int py)
 {
-	if (px >= posX - 1 && px <= posX + largeur + 1 && py >= posY  && py < posY + hauteur)       // on fait une collision si les entites sont a la meme position (+ - 1 pour amelirer la detection)
-        return 1;
+	if (px >= posX - 1 && px <= posX + largeur + 1 && py >= posY && py < posY + hauteur)       // on fait une collision si les entites sont a la meme position (+ - 1 pour amelirer la detection)
+		return 1;
 
-    return 0;
+	return 0;
 }
 
 void Entite::getPosJoueur(int x, int y)
@@ -46,7 +46,7 @@ void Entite::perdVie(int nbVie)
 {
 	for (int i = 0; i < nbVie; i++)     //joueur perd 2 vies si il entre en collision avec un ennemi   // pour peut ajouter un nb de degats a chaque ennemi
 	{
-		if (nbVies > 0 && enVie)
+		if (nbVies > 0 && enVie && !invincible)
 		{
 			nbVies--;
 			if (nbVies == 0)
@@ -59,10 +59,10 @@ void Entite::perdVie(int nbVie)
 
 Joueur::Joueur(int x, int y) : Entite(x, y, '^', 1, 1)  //on set les valeurs par defaut pour le joueur
 {
-    nbVies = 10;
-    attkDmg = 1;
-    vitesse = 1;
-    shootCooldown = 3;
+	nbVies = 10;
+	attkDmg = 1;
+	vitesse = 1;
+	shootCooldown = 3;
 	shootTimer = 0;
 	bulletAllie = true;
 	typeEntite = JOUEUR;
@@ -76,9 +76,9 @@ Joueur::Joueur(int x, int y) : Entite(x, y, '^', 1, 1)  //on set les valeurs par
 void Joueur::update()
 {
 
-	if (shootTimer > 0) 
-	    shootTimer--;
-	
+	if (shootTimer > 0)
+		shootTimer--;
+
 	if (barrelRoll)					//si le joueur fait un barrel roll
 	{
 		barrelRoll = false;
@@ -98,10 +98,10 @@ void Joueur::update()
 	{
 		symbole = '^';
 	}
-	
-	if (coolDownBarrelRoll > 0)		
+
+	if (coolDownBarrelRoll > 0)
 		coolDownBarrelRoll--;
-	
+
 	if (barrelRollTimer > 0)
 		barrelRollTimer--;
 
@@ -110,22 +110,22 @@ void Joueur::update()
 
 }
 
-	
+
 //******************************** classe ennemi ***********************************
 
-Ennemi::Ennemi(int x, int y) : Entite(x, y, 'X', 1, 1) 
+Ennemi::Ennemi(int x, int y) : Entite(x, y, 'X', 1, 1)
 {
 	//set des valeurs par defaut pour les ennemis a etre redefinies dans les classes enfant
-    attkDmg = 1;
-    vitesse = 1;
-    direction = rand() % 2; ; // 0 A gauche, 1 a droite
-    shootCooldown = 50;
-    shootTimer = -1;
-    nbVies = 1;
+	attkDmg = 1;
+	vitesse = 1;
+	direction = rand() % 2; ; // 0 A gauche, 1 a droite
+	shootCooldown = 50;
+	shootTimer = -1;
+	nbVies = 1;
 	moveTimer = 0;
 	bulletAllie = false;
 	typeEntite = ENNEMI;
-    typeEnnemi = BASIC;
+	typeEnnemi = BASIC;
 	shoots = true;
 	posRand = 0;
 }
@@ -136,49 +136,49 @@ void Ennemi::update()
 
 BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y)
 {
-    symbole = 'W';
+	symbole = 'W';
 	nbVies = 3;
-    shootCooldown = 100;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
+	shootCooldown = 100;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
 	//shootTimer = rand() % shootCooldown;   //on set le timer de tir a un nombre aleatoire entre 0 et le cooldown de tir
-    typeEnnemi = BASIC;
-    hauteur = 2;
+	typeEnnemi = BASIC;
+	hauteur = 2;
 	largeur = 4;
 	moveTimer = rand() % shootCooldown;   //on set le timer de mouvement a un nombre aleatoire entre 0 et le cooldown de tir pour que les ennemis tirent a des moments differents
 }
 
 void BasicEnnemi::update()
 {
-    if (moveTimer % 5 == 0)         //a toute les 5 update on peut bouger en X 
-    {
-        if (posX <= 1 || posX + largeur >= WIDTH-1)
-            direction = 1 - direction; // Change de Direction
+	if (moveTimer % 5 == 0)         //a toute les 5 update on peut bouger en X 
+	{
+		if (posX <= 1 || posX + largeur >= WIDTH - 1)
+			direction = 1 - direction; // Change de Direction
 
-        if (direction == 0)
-            posX -= 1;
-        else
-            posX += 1; // Bouger a gauche ou a droite
-    }
+		if (direction == 0)
+			posX -= 1;
+		else
+			posX += 1; // Bouger a gauche ou a droite
+	}
 
 	if (moveTimer % 8 == 0)   //a toute les 8 update on peut bouger en Y
-        posY++;
+		posY++;
 
 	if (moveTimer >= 100)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
 		moveTimer = 0;
 
 	if (posY >= HEIGHT)     //si l'ennemi atteint le bas de l'ecran is meurt
-        enVie = false;
-    
-    moveTimer++;
+		enVie = false;
+
+	moveTimer++;
 }
 
 
 DiveBomber::DiveBomber(int x, int y) : Ennemi(x, y)
 {
-    symbole = 'V';
-    nbVies = 3;
-    typeEnnemi = DIVEBOMBER;
-    hauteur = 4;
-    largeur = 2;
+	symbole = 'V';
+	nbVies = 3;
+	typeEnnemi = DIVEBOMBER;
+	hauteur = 4;
+	largeur = 2;
 	shoots = false;
 }
 
@@ -212,41 +212,41 @@ Tank::Tank(int x, int y) : Ennemi(x, y)
 	hauteur = 1;
 	largeur = 9;
 	shoots = false;
-    posRand = rand() % 4;   //donne une valeur qu'on va ajouter a son y pour pas qu'ils soient tous alignes
+	posRand = rand() % 4;   //donne une valeur qu'on va ajouter a son y pour pas qu'ils soient tous alignes
 }
 
 void Tank::update()
 {
-    if (moveTimer % 5 == 0)
-    {
-        if(posY <= HEIGHT/3 + posRand)
-		    posY++;
-    }
+	if (moveTimer % 5 == 0)
+	{
+		if (posY <= HEIGHT / 3 + posRand)
+			posY++;
+	}
 	if (moveTimer % 50 == 0)
 	{
 		if (posX <= 1 || posX + largeur >= WIDTH - 1)
 			direction = 1 - direction; // Change de Direction
-        if (direction == 0) 
-            posX -= 1; 
-        else 
-            posX += 1; // Bouger a gauche ou a droite
+		if (direction == 0)
+			posX -= 1;
+		else
+			posX += 1; // Bouger a gauche ou a droite
 	}
-    if (moveTimer >= 100)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
-        moveTimer = 0;
-    moveTimer++;
+	if (moveTimer >= 100)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+		moveTimer = 0;
+	moveTimer++;
 }
 
 
 
 Artilleur::Artilleur(int x, int y) : Ennemi(x, y)
 {
-    shoots = true;
+	shoots = true;
 	symbole = 'H';
-    nbVies = 3;
+	nbVies = 3;
 	typeEnnemi = ARTILLEUR;
 	hauteur = 2;
 	largeur = 2;
-    shootCooldown = 80;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
+	shootCooldown = 80;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
 	posRand = rand() % 6;   //donne une valeur qu'on va ajouter a son y pour pas qu'ils soient tous alignes
 	ammoType = FRAGMENTING;
 }
@@ -277,15 +277,15 @@ Zaper::Zaper(int x, int y) : Ennemi(x, y)
 	typeEnnemi = ZAPER;
 	hauteur = 2;
 	largeur = 3;
-	shootCooldown = 1;   
+	shootCooldown = 1;
 	ammoType = LASER;
-	moveTimer = 0;		//poru qu'ils tirent tous en meme temps qd ils appaissent
+	//moveTimer = 0;		//poru qu'ils tirent tous en meme temps qd ils appaissent
 
 }
 
 void Zaper::update()
 {
-	if(posY <= HEIGHT/10 && moveTimer % 8 == 0)
+	if (posY <= HEIGHT / 10 && moveTimer % 8 == 0)
 		posY++;
 
 	if (moveTimer % 25 == 0)
@@ -305,16 +305,109 @@ void Zaper::update()
 		else if (shoots)
 			shoots = false;
 	}
-	
+
 	moveTimer++;
 	if (moveTimer >= 500)
 		moveTimer = 0;
 }
 
+Boss1::Boss1(int x, int y) : Ennemi(x, y)
+{
+	symbole = 'B';
+	nbVies = 75;
+	typeEnnemi = BOSS1_MAIN;
+	typeEntite = BOSS;
+	ammoType = HOMING;
+	hauteur = 8;
+	largeur = 15;
+	shootCooldown = 50;   // x frames avant de tirer donc plus gros chiffre = tir plus lent
+	shoots = true;
+}
+
+void Boss1::update()
+{
+	if (moveTimer % 5 == 0)
+	{
+		if (posY <= HEIGHT / 15)
+			posY++;
+	}
+	if (moveTimer % 5 == 0)
+	{
+		if (posX <= 1 || posX + largeur >= WIDTH - 1)
+			direction = 1 - direction; // Change de Direction
+		if (direction == 0)
+			posX -= 1;
+		else
+			posX += 1; // Bouger a gauche ou a droite
+	}
+	if (moveTimer >= 100)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+		moveTimer = 0;
+	moveTimer++;
+}
+
+Boss1Side::Boss1Side(int x, int y) : Ennemi(x, y)
+{
+	symbole = 'B';
+	nbVies = 45;
+	typeEntite = BOSS;
+	typeEnnemi = BOSS1_SIDE;
+	hauteur = 3;
+	largeur = 8;
+	shoots = false;
+	shootCooldown = 1;
+	ammoType = LASER;
+	firstEntry = true;
+
+	if ((rand() % 3) == 0)		//pour que les side boss side tirent a des moments differents cahque foais qu'il spawn
+		shootTiming = true;
+	else
+		shootTiming = false;
+
+}
+
+
+void Boss1Side::update()
+{
+	if (moveTimer % 5 == 0 && posY <= 13)
+		posY++;
+	else if (posY >= 13)
+	{
+		if (firstEntry)
+		{
+			shoots = shootTiming;
+			firstEntry = false;
+		}
+
+		if (moveTimer % 2 == 0)         //a toute les 5 update on peut bouger en X 
+		{
+			if (posX <= 1 || posX + largeur >= WIDTH - 1)
+				direction = 1 - direction; // Change de Direction
+
+			// Bouger a gauche ou a droite
+			if (direction == 0)
+				posX -= 1;
+			else
+				posX += 1;
+		}
+
+		if (moveTimer % 100 == 0)   //determine le temps on et off du laser
+		{
+			if (!shoots)
+				shoots = true;
+			else if (shoots)
+				shoots = false;
+		}
+	}
+
+	if (moveTimer >= 500)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+		moveTimer = 0;
+
+	moveTimer++;
+}
 
 //******************************** classe bullet ***********************************
 
-Bullet::Bullet(int x, int y, bool isPlayerBullet) : Entite(x, y,'|', 1, 1)
+Bullet::Bullet(int x, int y, bool isPlayerBullet) : Entite(x, y, '|', 1, 1)
 {
 	//set des valeurs par defaut pour les bullets a etre redefinies dans les classes enfant
 	nbVies = 0;
@@ -325,31 +418,31 @@ Bullet::Bullet(int x, int y, bool isPlayerBullet) : Entite(x, y,'|', 1, 1)
 
 BasicBullet::BasicBullet(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
 {
-    symbole = '|';
-    ammoType = NORMAL;
+	symbole = '|';
+	ammoType = NORMAL;
 	hauteur = 1;
 	largeur = 1;
-    sfxx.PlaySFXAsync("basicbullet.wav");
+	 sfxx.PlaySFXAsync("basicbullet.wav");
 }
 
 void BasicBullet::update()
 {
-    if (bulletAllie)
-    {
-        if (moveTimer % 1 == 0) {       //on va pouvoir changer la vitesse de la bullet dependant du modulo
-            posY--;
-            if (posY < 0)
-                enVie = false;
-        }
-    }
-    else    //c'est une bullet ennemi
-    {
+	if (bulletAllie)
+	{
+		if (moveTimer % 1 == 0) {       //on va pouvoir changer la vitesse de la bullet dependant du modulo
+			posY--;
+			if (posY < 0)
+				enVie = false;
+		}
+	}
+	else    //c'est une bullet ennemi
+	{
 		if (moveTimer % 1 == 0) {       //on peut aussi ajuster la vitesse des bullets ennemis
-            posY++;
-            if (posY >= HEIGHT+1)
-                enVie = false;
-        }
-    }
+			posY++;
+			if (posY >= HEIGHT + 1)
+				enVie = false;
+		}
+	}
 	moveTimer++;
 
 	if (moveTimer >= 100)
@@ -369,10 +462,10 @@ void FragmentingBullet::update()
 {
 	if (moveTimer % 1 == 0)        //on peut aussi ajuster la vitesse des bullets ennemis
 		posY++;
-	
+
 	if (posY >= HEIGHT + 1)
 		enVie = false;
-	
+
 }
 
 Laser::Laser(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
@@ -393,17 +486,46 @@ void Laser::update()
 
 }
 
+Homing::Homing(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPlayerBullet)
+{
+	symbole = 'V';
+	ammoType = HOMING;
+	hauteur = 2;
+	largeur = 1;
+	nbVies = 2;
+}
+
+void Homing::update()
+{
+	if (moveTimer % 1 == 0)         //on peut ajuster la vitesse en x du missile
+	{
+		if (posX < xJoueur)
+			posX++;
+		else if (posX > xJoueur)
+			posX--;
+	}
+	if (moveTimer % 1 == 0)         //on peut ajuster la vitesse du missile
+	{
+		posY++;
+	}
+	if (moveTimer >= 100)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs
+		moveTimer = 0;
+	if (posY >= HEIGHT)     //si le missile atteint le bas de l'ecran is meurt
+		enVie = false;
+	moveTimer++;
+}
 
 //******************************** classe obstacle ***********************************
 
-Obstacle::Obstacle(int x, int y, int longueur, int larg, int vie) : Entite(x, y,'#', 3, 1)
+Obstacle::Obstacle(int x, int y, int longueur, int larg, int vie) : Entite(x, y, '#', 3, 1)
 {
-    nbVies = vie;
+	nbVies = vie;
 }
 
-void Obstacle::update() 
+void Obstacle::update()
 {
-    if (nbVies <= 0) 
-        enVie = false;
+	if (nbVies <= 0)
+		enVie = false;
 }
+
 
