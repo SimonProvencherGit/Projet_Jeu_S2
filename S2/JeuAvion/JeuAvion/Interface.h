@@ -28,6 +28,7 @@ class Interface
     bool enExplosion;
     int cdExplosion;
 	bool bossSpawned;
+	int bossWaitTimer;      //timer pour attendre un certain temps apres que les ennemis soient morts avant de spawn le boss
 
     public:
     Interface();
@@ -43,6 +44,7 @@ class Interface
 	void hideCursor();
 	void showCursor();
     void explosion();
+	bool allDead();
 };
 
 #endif // INTERFACE_H

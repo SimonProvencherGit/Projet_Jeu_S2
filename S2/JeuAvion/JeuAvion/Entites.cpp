@@ -331,7 +331,7 @@ void Boss1::update()
 		if (posY <= HEIGHT / 15)
 			posY++;
 	}
-	if (moveTimer % 20 == 0)
+	if (moveTimer % 5 == 0)
 	{
 		if (posX <= 1 || posX + largeur >= WIDTH - 1)
 			direction = 1 - direction; // Change de Direction
@@ -353,44 +353,50 @@ Boss1Side::Boss1Side(int x, int y) : Ennemi(x, y)
 	typeEnnemi = BOSS1_SIDE;
 	hauteur = 3;
 	largeur = 8;
-	//shoots = true;
+	shoots = false;
 	shootCooldown = 1;
 	ammoType = LASER;
+	firstEntry = true;
 	
 	if ((rand() % 3) == 0)		//pour que les side boss side tirent a des moments differents cahque foais qu'il spawn
-		shoots = true;
+		shootTiming = true;
 	else
-		shoots = false;
+		shootTiming = false;
 
 }	
 
 
 void Boss1Side::update()
 {
-	if (moveTimer % 5 == 0)
+	if (moveTimer % 5 == 0 && posY <= 13)
+		posY++;
+	else if(posY >= 13)
 	{
-		if (posY <= 13)
-			posY++;
-	}
+		if (firstEntry)
+		{
+			shoots = shootTiming;
+			firstEntry = false;
+		}
 
-	if (moveTimer % 2 == 0)         //a toute les 5 update on peut bouger en X 
-	{
-		if (posX <= 1 || posX + largeur >= WIDTH - 1)
-			direction = 1 - direction; // Change de Direction
+		if (moveTimer % 2 == 0)         //a toute les 5 update on peut bouger en X 
+		{
+			if (posX <= 1 || posX + largeur >= WIDTH - 1)
+				direction = 1 - direction; // Change de Direction
 
-		// Bouger a gauche ou a droite
-		if (direction == 0)
-			posX -= 1;
-		else
-			posX += 1; 
-	}
+			// Bouger a gauche ou a droite
+			if (direction == 0)
+				posX -= 1;
+			else
+				posX += 1;
+		}
 
-	if (moveTimer % 125 == 0)   //determine le temps on et off du laser
-	{
-		if (!shoots)
-			shoots = true;
-		else if (shoots)
-			shoots = false;
+		if (moveTimer % 100 == 0)   //determine le temps on et off du laser
+		{
+			if (!shoots)
+				shoots = true;
+			else if (shoots)
+				shoots = false;
+		}
 	}
 
 	if (moveTimer >= 500)       //puique move timer augmente a l'infini, on le reset a 0 avant qu'il ne monte trop haut pour eviter des erreurs

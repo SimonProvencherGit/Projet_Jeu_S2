@@ -125,6 +125,8 @@ class Boss1 : public Ennemi
 class Boss1Side : public Ennemi
 {
     public:
+    bool shootTiming;
+    bool firstEntry;
 	Boss1Side(int x, int y);
 	void update();    //gere le deplacement de l'ennemi
 };

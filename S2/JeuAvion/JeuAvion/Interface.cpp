@@ -14,6 +14,7 @@ Interface :: Interface()
 	explosionPosY = 0;
 	cdExplosion = 0;
 	bossSpawned = false;
+	bossWaitTimer = 0;
 
     listEntites.emplace_back(make_unique<Joueur>(WIDTH / 2, HEIGHT - 1));   //ajoute le joueur a la liste d'entites
 	joueur = static_cast<Joueur*>(listEntites.back().get());                //on recupere le * du joueur de la liste d'entites
@@ -114,6 +115,18 @@ void Interface::explosion()
         enExplosion = false;
 }
 
+bool Interface::allDead()
+{
+	bool allDead = true;
+
+	for (auto& e : listEntites)
+	{
+		if (e->enVie == true && e->typeEntite == ENNEMI)
+			allDead = false;
+	}
+    return allDead;
+}
+
 
 //fait spawn x nb d'ennemis
 void Interface::enemySpawn(int nbEnnemi, typeEnnemis ennemiVoulu)
@@ -190,7 +203,7 @@ void Interface::progressionDifficulte()
     }
 	if (score >= 300 && score < 600)
 	{
-		if (enemySpawnTimer >= 40)          //on fait spawn une vague d'ennemis a toutes les 60 frames
+		if (enemySpawnTimer >= 25)          //on fait spawn une vague d'ennemis a toutes les 60 frames
 		{
 			//enemySpawn(3, BASIC);   //on fait spawn 4 ennemis a chaque vague
             enemySpawn(5, DIVEBOMBER);
@@ -209,17 +222,15 @@ void Interface::progressionDifficulte()
 	}
 	if (score >= 1000 && !bossSpawned)
 	{
-		/*bool allEnnemiDead = true;
-		for (auto& e : listEntites)
-		{
-			if (e->enVie = true && e->typeEntite == ENNEMI)
-				allEnnemiDead = false;
-		}*/
-        //if (allEnnemiDead) 
-        //{
-            enemySpawn(1, BOSS1_MAIN);
-            bossSpawned = true;
-       // }
+        if (allDead()) 
+        {
+            if (bossWaitTimer > 50) {
+                enemySpawn(1, BOSS1_MAIN);
+                bossSpawned = true;
+            }
+			else
+				bossWaitTimer++;
+        }
 	}
 }
 
