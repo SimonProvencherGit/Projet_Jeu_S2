@@ -321,8 +321,8 @@ Boss1::Boss1(int x, int y) : Ennemi(x, y)
 {
 	symbole = 'B';
 	nbVies = 65;
-	typeEnnemi = BOSS1_MAIN;
 	typeEntite = BOSS;
+	typeEnnemi = BOSS1_MAIN;
 	ammoType = HOMING;
 	hauteur = 8;
 	largeur = 15;

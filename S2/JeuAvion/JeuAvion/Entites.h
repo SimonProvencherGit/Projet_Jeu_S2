@@ -12,7 +12,7 @@ const int WIDTH = 100;
 const int HEIGHT = 37;
 const int CD_BARRELROLL = 75;
 
-enum typeEntites { JOUEUR, ENNEMI, OBSTACLE, BULLET, BOSS };
+enum typeEntites { JOUEUR, ENNEMI, OBSTACLE, BULLET, BOSS};
 enum typeEnnemis { BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, ZAPER, BOSS1_MAIN, BOSS1_SIDE };
 enum typeBullets { NORMAL, LASER, MULTIPLE, HOMING, BOMB, FRAGMENTING };
 

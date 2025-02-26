@@ -101,7 +101,7 @@ void Interface::explosion()
     {
         for (auto& e : listEntites)
         {
-            if (e->enVie && e->posY >= explosionPosY - 2 && e->posY <= explosionPosY + 2 && !e->isPlayer && e->typeEntite != BOSS)	//on verifie si l'entite est dans une zone d'explosion qui avance vers le haut de l'ecran
+            if (e->enVie && e->posY >= explosionPosY - 2 && e->posY <= explosionPosY + 2 && !e->isPlayer && e->getTypeEnnemi() != BOSS)	//on verifie si l'entite est dans une zone d'explosion qui avance vers le haut de l'ecran
             {
                 e->enVie = false;
                 score += 10;
@@ -121,7 +121,7 @@ bool Interface::allDead()
 
     for (auto& e : listEntites)
     {
-        if (e->enVie == true && e->typeEntite == ENNEMI)
+        if (e->enVie == true && (e->typeEntite == ENNEMI || e->typeEntite == BOSS))
             allDead = false;
     }
     return allDead;
@@ -192,7 +192,7 @@ void Interface::progressionDifficulte()
     if (score < 300)
     {
 
-        if (enemySpawnTimer >= 100)          //on fait spawn une vague d'ennemis a toutes les 70 frames
+        if (enemySpawnTimer >= 120)          //on fait spawn une vague d'ennemis a toutes les 70 frames
         {
             enemySpawn(2, BASIC);   //on fait spawn 3 ennemis a chaque vague
             enemySpawn(1, DIVEBOMBER);
@@ -226,7 +226,7 @@ void Interface::progressionDifficulte()
     {
         if (allDead())
         {
-            if (bossWaitTimer > 50)
+			if (bossWaitTimer > 50)	 //on attend un certain temps apres la mort du dernier ennemi avant de spawn le boss
             {
                 enemySpawn(1, BOSS1_MAIN);
                 bossSpawned = true;
@@ -235,6 +235,13 @@ void Interface::progressionDifficulte()
                 bossWaitTimer++;
         }
     }
+    /*if (allDead())
+    {
+        if (enemySpawnTimer >= 2)
+        {
+            enemySpawn(1, DIVEBOMBER);
+        }
+    }*/
 }
 
 
@@ -253,26 +260,26 @@ void Interface::updateEntites()
             if (e->typeEntite == ENNEMI && e->ammoType == NORMAL && e->moveTimer % e->shootCooldown == 0 && e->shoots)    //on verifie si c'est un ennemi et si sont compteur pour tirer est a 0
                 bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX + e->largeur / 2, e->posY + e->hauteur + 1, false));     //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle  
 
-            if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0 && e->shoots)
+			if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0 && e->shoots)     //si c'est un ennemi qui tire des fragmenting bullets
                 bufferBullets.emplace_back(make_unique<FragmentingBullet>(e->posX + e->largeur / 2, e->posY + e->hauteur + 1, false));
 
-            if ((e->typeEntite == ENNEMI || e->typeEntite == BOSS) && e->ammoType == LASER && e->moveTimer % e->shootCooldown == 0 && e->shoots)
+			if ((e->typeEntite == ENNEMI || e->typeEntite == BOSS) && e->ammoType == LASER && e->moveTimer % e->shootCooldown == 0 && e->shoots)	//si c'est un ennemi qui tire des lasers
                 bufferBullets.emplace_back(make_unique<Laser>(e->posX + e->largeur / 2, e->posY + e->hauteur, false));
 
-            if (e->typeEntite == BOSS && e->ammoType == HOMING && e->moveTimer % e->shootCooldown == 0 && e->shoots)
+			if (e->getTypeEnnemi() == BOSS1_MAIN && e->moveTimer % e->shootCooldown == 0 && e->shoots)    //si c'est le boss1 tire des 3 missiles
             {
                 bufferBullets.emplace_back(make_unique<Homing>(e->posX + e->largeur / 4, e->posY + e->hauteur + 1, false));
                 bufferBullets.emplace_back(make_unique<Homing>(e->posX + e->largeur - e->largeur / 4, e->posY + e->hauteur + 1, false));
                 bufferBullets.emplace_back(make_unique<Homing>(e->posX + e->largeur / 2, e->posY + e->hauteur + 1, false));
             }
 
-            if (e->typeEntite == BOSS && e->ammoType == HOMING)
+            if (e->getTypeEnnemi() == BOSS1_MAIN)    //verifie si c'est le main boss pour faire qu'il est invincible si on a pas tuer ces side boss
             {
                 e->invincible = false;
 
                 for (auto& e2 : listEntites)
                 {
-                    if (e2->enVie == true && e2->typeEntite == BOSS && e2->ammoType == LASER)
+                    if (e2->enVie == true && e2->getTypeEnnemi() == BOSS1_SIDE)
                     {
                         e->invincible = true;
                     }
