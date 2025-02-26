@@ -45,6 +45,7 @@ public:
     void showCursor();
     void explosion();
     bool allDead();
+	int customPoints(typeEnnemis);
 };
 
 #endif // INTERFACE_H

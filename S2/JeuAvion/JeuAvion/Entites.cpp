@@ -42,6 +42,11 @@ void Entite::getPosJoueur(int x, int y)
 	yJoueur = y;
 }
 
+typeEnnemis Entite::getTypeEnnemi()		// va etre redefinie dans la classe ennemi pour retourner le type d'ennemi
+{
+	return BASIC;	//retourne BASIC par defaut
+}
+
 void Entite::perdVie(int nbVie)
 {
 	for (int i = 0; i < nbVie; i++)     //joueur perd 2 vies si il entre en collision avec un ennemi   // pour peut ajouter un nb de degats a chaque ennemi
@@ -130,8 +135,9 @@ Ennemi::Ennemi(int x, int y) : Entite(x, y, 'X', 1, 1)
 	posRand = 0;
 }
 
-void Ennemi::update()
+typeEnnemis Ennemi::getTypeEnnemi()
 {
+	return typeEnnemi;
 }
 
 BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y)
@@ -314,7 +320,7 @@ void Zaper::update()
 Boss1::Boss1(int x, int y) : Ennemi(x, y)
 {
 	symbole = 'B';
-	nbVies = 75;
+	nbVies = 65;
 	typeEnnemi = BOSS1_MAIN;
 	typeEntite = BOSS;
 	ammoType = HOMING;

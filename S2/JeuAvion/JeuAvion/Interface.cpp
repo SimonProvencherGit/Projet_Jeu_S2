@@ -128,6 +128,8 @@ bool Interface::allDead()
 }
 
 
+
+
 //fait spawn x nb d'ennemis
 void Interface::enemySpawn(int nbEnnemi, typeEnnemis ennemiVoulu)
 {
@@ -329,10 +331,10 @@ void Interface::gererCollisions()
                                 bufferBullets.emplace_back(make_unique<BasicBullet>(e2->posX + i, e2->posY + 1, false));
 
                         e2->perdVie(1);
-                        e->enVie = false;
+						e->enVie = false;   //la bullet meurt si elle entre en collision avec un ennemi
 
-                        if (!e2->enVie && e2->typeEntite != BULLET)
-                            score += 10;
+                        if (!e2->enVie && e2->typeEntite == ENNEMI)
+                            score += customPoints(e2->getTypeEnnemi());
                     }
                 }
             }
@@ -345,6 +347,34 @@ void Interface::gererCollisions()
         listEntites.push_back(move(bullet));	//on ajoute les bullets du buffer a la liste d'entites
 }
 
+int Interface::customPoints(typeEnnemis e)
+{
+	switch (e)
+	{
+	case BASIC:
+		return 10;
+		break;
+	case TANK:
+		return 20;
+		break;
+	case ARTILLEUR:
+		return 25;
+		break;
+	case DIVEBOMBER:
+		return 20;
+		break;
+	case ZAPER:
+		return 30;
+		break;
+	case BOSS1_MAIN:
+		return 100;
+		break;
+	case BOSS1_SIDE:
+		return 50;
+		break;
+	}
+    return 0;
+}
 
 //met a jour l'affichage de la console 
 void Interface::updateAffichage()
@@ -498,7 +528,7 @@ void Interface::executionJeu()
         gererCollisions();
         enleverEntites();
         updateAffichage();
-        Sleep(25);
+        Sleep(20);
 
     }
     Sleep(1500);
