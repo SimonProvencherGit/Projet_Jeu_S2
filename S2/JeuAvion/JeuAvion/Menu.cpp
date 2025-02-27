@@ -37,8 +37,9 @@ void Gerer_Menu::peser() {
 
 		switch (touche_peser) {
 		case 'w':
-			if (choix_option <= 0)
+			if (choix_option == 0)
 				choix_option = 0;
+
 			else
 				choix_option = choix_option - 1;
 			break;
@@ -96,24 +97,30 @@ void Jouer::peser() {
 
 		switch (touche_peser) {
 		case 'w':
-			if (choix_option == 0)
-				choix_option = 0;
-			else
+			if (choix_option == 0) {
+			choix_option = 0;
+			
+		}
+		
+			else {
 				sfx2.playSFX("pling.wav");
 				choix_option = choix_option - 1;
+			}
 			break;
-
 		case 's':
 			if (choix_option == 1)
 				choix_option = 1;
 			else
 				choix_option = choix_option + 1;
-			sfx2.playSFX("pling.wav");
+			//sfx2.playSFX("pling.wav");
 			break;
 
 		case '\r':
+
+			
 			switch (choix_option) {
 			case 0:
+				sfx2.playSFX("Select.wav");
 				music2.stopMusic();
 				//music2.setVolume(500);
 				//music2.playMusic("OceanWorld.wav");
