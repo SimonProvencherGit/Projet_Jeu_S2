@@ -138,12 +138,14 @@
     <ClCompile Include="Entites.cpp" />
     <ClCompile Include="Interface.cpp" />
     <ClCompile Include="JeuAvion.cpp" />
+    <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Music.cpp" />
     <ClCompile Include="SFX.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entites.h" />
     <ClInclude Include="Interface.h" />
+    <ClInclude Include="Menu.h" />
     <ClInclude Include="Music.h" />
     <ClInclude Include="SFX.h" />
   </ItemGroup>

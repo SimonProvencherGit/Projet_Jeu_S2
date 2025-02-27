@@ -1,8 +1,12 @@
 #include "Interface.h"
 
+Music music;
+SFX sfx1;
+
 Interface::Interface()
 {
     //initialisation des vairalbes 
+    music.setVolume(500);
     score = 0;
     gameOver = false;
     enemySpawnTimer = 0;
@@ -16,6 +20,8 @@ Interface::Interface()
     boss1Spawned = false;
     bossWaitTimer = 0;
     memScore = 1200;
+    bossMusicStart = false;
+	bossSpawnSound = false;
 
     listEntites.emplace_back(make_unique<Joueur>(WIDTH / 2, HEIGHT - 1));   //ajoute le joueur a la liste d'entites
     joueur = static_cast<Joueur*>(listEntites.back().get());                //on recupere le * du joueur de la liste d'entites
@@ -216,7 +222,7 @@ void Interface::progressionDifficulte()
             enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
         }
     }
-    if (score >= 800 && score < 1200)
+    if ((score >= 800 && score < 1200) || cbVivant() < 3)
     {
         if (enemySpawnTimer >= 100)          //on fait spawn une vague d'ennemis a toutes les 50 frames
         {
@@ -242,7 +248,24 @@ void Interface::progressionDifficulte()
     {
         if (cbVivant() == 0)
         {
-            if (bossWaitTimer > 100)	 //on attend un certain temps apres la mort du dernier ennemi avant de spawn le boss
+            if (!bossMusicStart && !bossSpawnSound)
+            {
+                music.stopMusic();
+				sfx1.playSFX("warning.wav");
+				bossSpawnSound = true;
+				enemySpawnTimer = 0;
+            }
+            else if (!bossMusicStart && bossSpawnSound)
+            {  
+                if (enemySpawnTimer >= 150)
+                {
+					sfx1.stopSFX();
+                    music.playMusic("Boss1.wav");
+                    bossMusicStart = true;
+                }
+            }
+            
+            if (bossWaitTimer > 150)	 //on attend un certain temps apres la mort du dernier ennemi avant de spawn le boss
             {
                 enemySpawn(1, BOSS1_MAIN);
                 boss1Spawned = true;
@@ -256,13 +279,14 @@ void Interface::progressionDifficulte()
     }
     if (score >= memScore && score <= memScore + 300 && boss1Spawned)   //on fait spawn des ennemis apres que le boss soit mort 
     {
+
         if (bossWaitTimer > 50)
         {
             if (enemySpawnTimer >= 4)
             {
                 enemySpawn(1, DIVEBOMBER);
                 enemySpawnTimer = 0;
-                bossWaitTimer = 0;
+                //bossWaitTimer = 0;
             }
         }
         else
@@ -406,6 +430,7 @@ int Interface::customPoints(typeEnnemis e)
         return 20;
         break;
     case BOSS1_MAIN:
+        music.playMusic("Forest.wav");
         return 100;
         break;
     case BOSS1_SIDE:
@@ -413,6 +438,24 @@ int Interface::customPoints(typeEnnemis e)
         break;
     }
     return 0;
+}
+
+void Interface::restart()
+{
+	for (auto& e : listEntites)
+		e->enVie = false;
+
+    gameOver = false;
+    listEntites.emplace_back(make_unique<Joueur>(WIDTH / 2, HEIGHT - 1));   //ajoute le joueur a la liste d'entites
+    joueur = static_cast<Joueur*>(listEntites.back().get());
+    score = 0;
+	explosionTimer = 0;
+	enExplosion = false;
+	cdExplosion = 0;
+	boss1Spawned = false;
+	bossWaitTimer = 0;
+	memScore = 1200;
+
 }
 
 //met a jour l'affichage de la console 
@@ -522,6 +565,19 @@ void Interface::updateAffichage()
     for (size_t i = 0; i < texte.size(); i++)   //on ajoute le score au buffer
         buffer[HEIGHT + 3][i] = texte[i];
 
+    /*for (auto& pUp : listPowerUps)
+    {
+        if (pUp->enVie)
+        {
+            for (int y = 0; y < pUp->hauteur; y++)
+            {
+                for (int x = 0; x < pUp->largeur; x++)
+                {
+                    buffer[pUp->posY + y][pUp->posX + x] = pUp->symbole;
+                }
+            }
+        }
+    }*/
 
     // on affiche chaque ligne du buffer
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -553,6 +609,9 @@ void Interface::enleverEntites()
 void Interface::executionJeu()
 {
     hideCursor();
+    //music.stopMusic();
+	music.setVolume(500);
+	music.playMusic("OceanWorld.wav");
     while (!gameOver)
     {
         gererInput();
@@ -570,6 +629,8 @@ void Interface::executionJeu()
         Sleep(20);
 
     }
+    restart();
+
     Sleep(1500);
     showCursor();
 }
@@ -608,3 +669,38 @@ void Interface::showCursor()
     cursorInfo.bVisible = true;
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 }
+
+
+/*
+void Interface::powerupSpawn()
+{
+    powerUpSpawntimer++;
+
+    if (powerUpSpawntimer >= 300)
+    {
+        int x = rand() % WIDTH;
+        int y = rand() % HEIGHT / 2;
+        int randpower = rand() % 3;
+        typePowerUp type = static_cast<typePowerUp>(randpower);
+        listPowerUps.push_back(make_unique<PowerUp>(x, y + HEIGHT / 2, type));
+        powerUpSpawntimer = 0;
+    }
+}
+
+void Interface::gererCollisionsPowerUp()
+{
+    for (auto it = listPowerUps.begin(); it != listPowerUps.end();)
+    {
+        PowerUp* powerUp = it->get();
+
+        if (joueur->posX == powerUp->posX && joueur->posY == powerUp->posY)
+        {
+            joueur->TriggerPowerUp(powerUp->power_up);
+            it = listPowerUps.erase(it);
+        }
+        else
+        {
+            it++;
+        }
+    }
+}*/

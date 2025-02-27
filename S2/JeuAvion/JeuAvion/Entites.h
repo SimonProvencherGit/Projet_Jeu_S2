@@ -14,6 +14,8 @@ const int CD_BARRELROLL = 75;
 enum typeEntites { JOUEUR, ENNEMI, OBSTACLE, BULLET, BOSS };
 enum typeEnnemis { BASIC, TANK, ARTILLEUR, DIVEBOMBER, ZAPER, AIMBOT, BOSS1_MAIN, BOSS1_SIDE };
 enum typeBullets { NORMAL, LASER, MULTIPLE, HOMING, BOMB, FRAGMENTING };
+enum typePowerUp { SPEEDDOUBLED, DAMAGEDOUBLED, ADDLIFE };
+
 
 class Entite
 {
@@ -32,10 +34,13 @@ public:
     bool collisionJoueur;
     typeEntites typeEntite;
     typeBullets ammoType;
+    typePowerUp power_up;
     bool shoots;
     bool invincible;
     int invincibleTimer;
     bool isPlayer;
+    int barrelRollTimer = 0;
+
 
     Entite(int x, int y, char symb, int longueurEntite, int largeurEntite);
     virtual void update() = 0;
@@ -186,6 +191,14 @@ private:
 public:
     Obstacle(int x, int y, int longueur, int larg, int vie);
     void update();    //met a jour la vie de l'obstacle
+};
+
+
+class PowerUp : public Entite {
+public:
+    typePowerUp power_up;
+    PowerUp(int x, int y, typePowerUp type);
+    void update();
 };
 
 #endif 

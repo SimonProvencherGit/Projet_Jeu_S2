@@ -9,6 +9,8 @@
 #include <memory>  //pour unique_ptr 
 #include <conio.h>  //pour _kbhit()
 #include <string>
+#include "Music.h"
+#include "SFX.h"
 
 void setConsoleSize();
 
@@ -30,6 +32,10 @@ private:
     bool boss1Spawned;
     int bossWaitTimer;      //timer pour attendre un certain temps apres que les ennemis soient morts avant de spawn le boss
     int memScore;
+    bool bossMusicStart;
+	bool bossSpawnSound;
+    int powerUpSpawntimer;
+    //vector<unique_ptr<PowerUp>> listPowerUps;
 
 public:
     Interface();
@@ -47,6 +53,9 @@ public:
     void explosion();
     int cbVivant();
     int customPoints(typeEnnemis);
+    void powerupSpawn();
+    void gererCollisionsPowerUp();
+	void restart();
 };
 
 #endif // INTERFACE_H

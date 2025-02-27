@@ -1,5 +1,7 @@
 #include "Entites.h"
+
 SFX sfx;
+
 Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 {
 	//donne des valeurs par defaut aux variables qui vont etre redefinies dans les classes enfant
@@ -23,6 +25,7 @@ Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 	invincible = false;
 	invincibleTimer = 0;
 	isPlayer = false;
+	barrelRollTimer = 0;
 }
 
 
@@ -70,7 +73,7 @@ Joueur::Joueur(int x, int y) : Entite(x, y, '^', 1, 1)  //on set les valeurs par
 	shootTimer = 0;
 	bulletAllie = true;
 	typeEntite = JOUEUR;
-	barrelRollTimer = 0;
+	//barrelRollTimer = 0;
 	barrelRoll = false;
 	coolDownBarrelRoll = 0;
 	isPlayer = true;
@@ -566,3 +569,29 @@ void Obstacle::update()
 		enVie = false;
 }
 
+/*
+PowerUp::PowerUp(int x, int y, typePowerUp type) : Entite(x, y, '*', 2, 2)
+{
+	power_up = type;
+	enVie = true;
+}
+
+void PowerUp::update()
+{
+}
+
+void Joueur::TriggerPowerUp(typePowerUp power_up)
+{
+	switch (power_up)
+	{
+	case DAMAGEDOUBLED:
+		attkDmg = attkDmg * 2;
+		break;
+	case SPEEDDOUBLED:
+		vitesse = vitesse * 2;
+		break;
+	case ADDLIFE:
+		nbVies = nbVies + 1;
+		break;
+	}
+}*/
