@@ -27,8 +27,9 @@ private:
     int explosionPosY;
     bool enExplosion;
     int cdExplosion;
-    bool bossSpawned;
+    bool boss1Spawned;
     int bossWaitTimer;      //timer pour attendre un certain temps apres que les ennemis soient morts avant de spawn le boss
+    int memScore;
 
 public:
     Interface();
@@ -44,7 +45,8 @@ public:
     void hideCursor();
     void showCursor();
     void explosion();
-    bool allDead();
+    int cbVivant();
+    int customPoints(typeEnnemis);
 };
 
 #endif // INTERFACE_H

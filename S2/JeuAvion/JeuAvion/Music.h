@@ -1,23 +1,23 @@
 #ifndef MUSIC_H
 #define MUSIC_H
 
-#include <windows.h>
-#pragma comment(lib, "winmm.lib")
-
+#include <string>
+#include <SFML/Audio.hpp>
+#include <thread>
+using namespace std;
 class Music {
 public:
     Music();
     ~Music();
-    void StopMusic();
-    void PlayMusicWithVolumeControl(LPCSTR lpszSound);
-    void SetVolumeFadeout(int volume);
-    void SetVolume(int volume);
-    void PlayMusicAsync(LPCSTR lpszSound);
-private:
-    HWAVEOUT hWaveOut;
-    int volume = 50;
+    void playMusic(std::string song);
+    void stopMusic();
+    void setVolume(float volume);
 
-    void FadeOut(int duration);
+private:
+    void FadeOut();
+    sf::Music music;
+    int volume = 200;
+    std::thread musicThread;
 };
 
-#endif
+#endif // MUSIC_H

@@ -4,21 +4,19 @@
 #include <windows.h>    //pour le curseur de la console et sleep()
 //#include "Interface.h"
 #include "SFX.h"
-
 using namespace std;
 
 //definit la taille du jeu
 const int WIDTH = 100;
-const int HEIGHT = 40;
+const int HEIGHT = 37;
 const int CD_BARRELROLL = 75;
 
 enum typeEntites { JOUEUR, ENNEMI, OBSTACLE, BULLET, BOSS };
-enum typeEnnemis { BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, ZAPER, BOSS1_MAIN, BOSS1_SIDE };
+enum typeEnnemis { BASIC, TANK, ARTILLEUR, DIVEBOMBER, ZAPER, AIMBOT, BOSS1_MAIN, BOSS1_SIDE };
 enum typeBullets { NORMAL, LASER, MULTIPLE, HOMING, BOMB, FRAGMENTING };
 
 class Entite
 {
-protected:
 
 public:
     int posX, posY;
@@ -44,6 +42,7 @@ public:
     void perdVie(int nbVie);
     virtual bool enCollision(int px, int py);  // retourne vrai si px et py sont egaux au x et y de l'entite
     virtual void getPosJoueur(int x, int y);
+    virtual typeEnnemis getTypeEnnemi();
 };
 
 //-----------------------------------------------------------  classe Joueur -----------------------------------------------------------
@@ -68,15 +67,16 @@ public:
 class Ennemi : public Entite
 {
 protected:
-    typeEnnemis typeEnnemi;
     int attkDmg;
     int vitesse;
     bool direction;
     int posRand;
+    typeEnnemis typeEnnemi;
 
 public:
     Ennemi(int x, int y);
     virtual void update() = 0;     //gere le deplacement de l'ennemi
+    typeEnnemis getTypeEnnemi() override;
 };
 
 class BasicEnnemi : public Ennemi
@@ -113,6 +113,13 @@ class Zaper : public Ennemi
 public:
     Zaper(int x, int y);
     void update();    //gere le deplacement de l'ennemi
+};
+
+class Aimbot : public Ennemi
+{
+public:
+    Aimbot(int x, int y);
+    void update();
 };
 
 class Boss1 : public Ennemi

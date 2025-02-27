@@ -1,6 +1,5 @@
 #include "Entites.h"
-SFX sfxx;        //explication a mettre ici
-
+SFX sfx;
 Entite::Entite(int x, int y, char symb, int largeurEntite, int hauteurEntite)
 {
 	//donne des valeurs par defaut aux variables qui vont etre redefinies dans les classes enfant
@@ -40,6 +39,11 @@ void Entite::getPosJoueur(int x, int y)
 {
 	xJoueur = x;
 	yJoueur = y;
+}
+
+typeEnnemis Entite::getTypeEnnemi()		// va etre redefinie dans la classe ennemi pour retourner le type d'ennemi
+{
+	return BASIC;	//retourne BASIC par defaut
 }
 
 void Entite::perdVie(int nbVie)
@@ -130,8 +134,9 @@ Ennemi::Ennemi(int x, int y) : Entite(x, y, 'X', 1, 1)
 	posRand = 0;
 }
 
-void Ennemi::update()
+typeEnnemis Ennemi::getTypeEnnemi()
 {
+	return typeEnnemi;
 }
 
 BasicEnnemi::BasicEnnemi(int x, int y) : Ennemi(x, y)
@@ -207,7 +212,7 @@ void DiveBomber::update()
 Tank::Tank(int x, int y) : Ennemi(x, y)
 {
 	symbole = '@';
-	nbVies = 12;
+	nbVies = 10;
 	typeEnnemi = TANK;
 	hauteur = 1;
 	largeur = 9;
@@ -311,12 +316,45 @@ void Zaper::update()
 		moveTimer = 0;
 }
 
+Aimbot::Aimbot(int x, int y) : Ennemi(x, y)
+{
+	moveTimer = rand() % shootCooldown;   //on set le timer de mouvement a un nombre aleatoire entre 0 et le cooldown de tir pour que les ennemis tirent a des moments differents
+	shoots = true;
+	symbole = 'X';
+	nbVies = 3;
+	typeEnnemi = AIMBOT;
+	hauteur = 2;
+	largeur = 3;
+	shootCooldown = 50;   // a toute les x frames l'entite va tirer
+	posRand = rand() % 6;   //donne une valeur qu'on va ajouter a son y pour pas qu'ils soient tous alignes
+	ammoType = HOMING;
+}
+
+void Aimbot::update()
+{
+	if (posY <= (HEIGHT / 20) + posRand && moveTimer % 8 == 0)
+		posY++;
+
+	if (moveTimer % 50 == 0)
+	{
+		if (posX <= 1 || posX + largeur >= WIDTH - 1)
+			direction = 1 - direction; // Change de Direction
+		if (direction == 0)
+			posX -= 1;
+		else
+			posX += 1; // Bouger a gauche ou a droite
+	}
+
+	moveTimer++;
+}
+
+
 Boss1::Boss1(int x, int y) : Ennemi(x, y)
 {
 	symbole = 'B';
-	nbVies = 75;
-	typeEnnemi = BOSS1_MAIN;
+	nbVies = 65;
 	typeEntite = BOSS;
+	typeEnnemi = BOSS1_MAIN;
 	ammoType = HOMING;
 	hauteur = 8;
 	largeur = 15;
@@ -422,7 +460,7 @@ BasicBullet::BasicBullet(int x, int y, bool isPlayerBullet) : Bullet(x, y, isPla
 	ammoType = NORMAL;
 	hauteur = 1;
 	largeur = 1;
-	 sfxx.PlaySFXAsync("basicbullet.wav");
+	sfx.playSFX("basicbullet.wav"); // Jouer son du basic bullet
 }
 
 void BasicBullet::update()
@@ -527,5 +565,4 @@ void Obstacle::update()
 	if (nbVies <= 0)
 		enVie = false;
 }
-
 

@@ -4,21 +4,20 @@
 #include <iostream>
 #include "Interface.h"
 #include "Music.h"
-#include "SFX.h"
+
 
 int main() {
-    Music music;
-	
     SFX sfx;
-    sfx.setVolume(100);
-    music.SetVolume(3);
-    //music.PlayMusicAsync("mainmenu.wav");
-    printf("Press Enter To Start");
+    Music music;
+    music.setVolume(200);
+    music.playMusic("MainMenu.wav");
+    printf("Press Enter To Start"); 
+ 
     std::cin.get();
-    sfx.PlaySFXAsync("pling.wav");
+    sfx.playSFX("Select.wav");
+    music.playMusic("OceanWorld.wav");
     setConsoleSize();
     Interface game;
-    music.PlayMusicAsync("ingame.wav");
     game.executionJeu();
 
     return 0;

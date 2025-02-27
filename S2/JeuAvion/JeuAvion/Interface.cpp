@@ -13,8 +13,9 @@ Interface::Interface()
     enExplosion = false;
     explosionPosY = 0;
     cdExplosion = 0;
-    bossSpawned = false;
+    boss1Spawned = false;
     bossWaitTimer = 0;
+    memScore = 1200;
 
     listEntites.emplace_back(make_unique<Joueur>(WIDTH / 2, HEIGHT - 1));   //ajoute le joueur a la liste d'entites
     joueur = static_cast<Joueur*>(listEntites.back().get());                //on recupere le * du joueur de la liste d'entites
@@ -103,8 +104,9 @@ void Interface::explosion()
         {
             if (e->enVie && e->posY >= explosionPosY - 2 && e->posY <= explosionPosY + 2 && !e->isPlayer && e->typeEntite != BOSS)	//on verifie si l'entite est dans une zone d'explosion qui avance vers le haut de l'ecran
             {
+
                 e->enVie = false;
-                score += 10;
+                score += customPoints(e->getTypeEnnemi());
             }
         }
     }
@@ -115,17 +117,19 @@ void Interface::explosion()
         enExplosion = false;
 }
 
-bool Interface::allDead()
+int Interface::cbVivant()
 {
-    bool allDead = true;
+    int nbVivant = 0;
 
     for (auto& e : listEntites)
     {
-        if (e->enVie == true && e->typeEntite == ENNEMI)
-            allDead = false;
+        if (e->enVie == true && (e->typeEntite == ENNEMI || e->typeEntite == BOSS))
+            nbVivant++;
     }
-    return allDead;
+    return nbVivant;
 }
+
+
 
 
 //fait spawn x nb d'ennemis
@@ -143,9 +147,6 @@ void Interface::enemySpawn(int nbEnnemi, typeEnnemis ennemiVoulu)
             listEntites.emplace_back(make_unique<BasicEnnemi>(posRand, 0));
             positionSpawnRandom();
             break;
-        case RAPIDE:
-            //listEntites.emplace_back(make_unique<RapideEnnemi>(posRand, 0));
-            break;
         case TANK:
             listEntites.emplace_back(make_unique<Tank>(posRand, 0));
             positionSpawnRandom();
@@ -160,6 +161,10 @@ void Interface::enemySpawn(int nbEnnemi, typeEnnemis ennemiVoulu)
             break;
         case ZAPER:
             listEntites.emplace_back(make_unique<Zaper>(posRand, 0));
+            positionSpawnRandom();
+            break;
+        case AIMBOT:
+            listEntites.emplace_back(make_unique<Aimbot>(posRand, 0));
             positionSpawnRandom();
             break;
         case BOSS1_MAIN:
@@ -177,7 +182,7 @@ void Interface::positionSpawnRandom()       //on donne une position aleatoire a 
     posRand = (rand() % (WIDTH - listEntites.back()->largeur - 1)) + 1;     //on genere une position aleatoire pour l'ennemi + 1 pour ne pas etre sur la bordure
     anciennePos = posRand;
     while (posRand == anciennePos)	  //on s'assure que le nouvel ennemi n'est pas a la meme position que le dernier
-        posRand = (rand() % (WIDTH - listEntites.back()->largeur - 1)) + 1;
+        posRand = (rand() % (WIDTH - listEntites.back()->largeur - 1)) + 2;
 
     listEntites.back()->posX = posRand;
 }
@@ -187,21 +192,22 @@ void Interface::progressionDifficulte()
 {
     enemySpawnTimer++;
     // ******** je devrais probablement remplacer ca par des modulo du enemy spawn timer et remettre le compteur a 0 qd il est a une grande valeur  ********               
-    if (score < 300)
+    if (score < 350)
     {
 
-        if (enemySpawnTimer >= 100)          //on fait spawn une vague d'ennemis a toutes les 70 frames
+        if (enemySpawnTimer >= 100 || cbVivant() < 3)          //on fait spawn une vague d'ennemis a toutes les 70 frames
         {
-            enemySpawn(2, BASIC);   //on fait spawn 3 ennemis a chaque vague
-            enemySpawn(1, DIVEBOMBER);
+            enemySpawn(1, BASIC);   //on fait spawn 3 ennemis a chaque vague
+            //enemySpawn(1, DIVEBOMBER);
             //enemySpawn(1, TANK);
             enemySpawn(1, ARTILLEUR);
             //enemySpawn(1, ZAPER);
+            //enemySpawn(2, AIMBOT);
 
             enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
         }
     }
-    if (score >= 300 && score < 600)
+    if (score >= 300 && score < 800)
     {
         if (enemySpawnTimer >= 25)          //on fait spawn une vague d'ennemis a toutes les 60 frames
         {
@@ -210,28 +216,57 @@ void Interface::progressionDifficulte()
             enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
         }
     }
-    if (score >= 600 && score < 1000)
+    if (score >= 800 && score < 1200)
     {
-        if (enemySpawnTimer >= 40)          //on fait spawn une vague d'ennemis a toutes les 50 frames
+        if (enemySpawnTimer >= 100)          //on fait spawn une vague d'ennemis a toutes les 50 frames
         {
-            enemySpawn(2, ARTILLEUR);
+            //enemySpawn(1, ARTILLEUR);
             //enemySpawn(4, BASIC);   //on fait spawn 5 ennemis a chaque vague
-            enemySpawn(2, DIVEBOMBER);
+           // enemySpawn(2, DIVEBOMBER);
+            enemySpawn(2, AIMBOT);
+
+            int nbTank = 0;
+
+            for (auto& e : listEntites)
+            {
+                if (e->getTypeEnnemi() == TANK)
+                    nbTank++;
+            }
+            if (nbTank < 2)
+                enemySpawn(1, TANK);
+
             enemySpawnTimer = 0;        //on reset le timer pour pouvoir spanw la prochaine vague d'ennemis
         }
     }
-    if (score >= 1000 && !bossSpawned)
+    if (score >= 1200 && !boss1Spawned)
     {
-        if (allDead())
+        if (cbVivant() == 0)
         {
-            if (bossWaitTimer > 50)
+            if (bossWaitTimer > 100)	 //on attend un certain temps apres la mort du dernier ennemi avant de spawn le boss
             {
                 enemySpawn(1, BOSS1_MAIN);
-                bossSpawned = true;
+                boss1Spawned = true;
+
+                memScore = score + 250;     //on garde le score en memoire lorsque le boss apparait, on y ajoute 250 pour le score du boss afin de connaitre le score qd le boss meurt afin de faire apparaitre les prochains ennemis
+                bossWaitTimer = 0;
             }
             else
                 bossWaitTimer++;
         }
+    }
+    if (score >= memScore && score <= memScore + 300 && boss1Spawned)   //on fait spawn des ennemis apres que le boss soit mort 
+    {
+        if (bossWaitTimer > 50)
+        {
+            if (enemySpawnTimer >= 4)
+            {
+                enemySpawn(1, DIVEBOMBER);
+                enemySpawnTimer = 0;
+                bossWaitTimer = 0;
+            }
+        }
+        else
+            bossWaitTimer++;
     }
 }
 
@@ -251,26 +286,30 @@ void Interface::updateEntites()
             if (e->typeEntite == ENNEMI && e->ammoType == NORMAL && e->moveTimer % e->shootCooldown == 0 && e->shoots)    //on verifie si c'est un ennemi et si sont compteur pour tirer est a 0
                 bufferBullets.emplace_back(make_unique<BasicBullet>(e->posX + e->largeur / 2, e->posY + e->hauteur + 1, false));     //on cree un bullet a la position de l'ennemi qu'on met un buffer temporaire pour eviter de les ajouter a la liste d'entites pendant qu'on itere a travers d'elle  
 
-            if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0 && e->shoots)
+            if (e->typeEntite == ENNEMI && e->ammoType == FRAGMENTING && e->moveTimer % e->shootCooldown == 0 && e->shoots)     //si c'est un ennemi qui tire des fragmenting bullets
                 bufferBullets.emplace_back(make_unique<FragmentingBullet>(e->posX + e->largeur / 2, e->posY + e->hauteur + 1, false));
 
-            if ((e->typeEntite == ENNEMI || e->typeEntite == BOSS) && e->ammoType == LASER && e->moveTimer % e->shootCooldown == 0 && e->shoots)
+            if ((e->typeEntite == ENNEMI || e->typeEntite == BOSS) && e->ammoType == LASER && e->moveTimer % e->shootCooldown == 0 && e->shoots)	//si c'est un ennemi qui tire des lasers
                 bufferBullets.emplace_back(make_unique<Laser>(e->posX + e->largeur / 2, e->posY + e->hauteur, false));
 
-            if (e->typeEntite == BOSS && e->ammoType == HOMING && e->moveTimer % e->shootCooldown == 0 && e->shoots)
+            if (e->getTypeEnnemi() == AIMBOT && e->moveTimer % e->shootCooldown == 0 && e->shoots)    //si c'est un ennemi qui tire des missiles tete chercheuse
+                bufferBullets.emplace_back(make_unique<Homing>(e->posX + e->largeur / 2, e->posY + e->hauteur + 1, false));
+
+
+            if (e->getTypeEnnemi() == BOSS1_MAIN && e->moveTimer % e->shootCooldown == 0 && e->shoots)    //si c'est le boss1 tire des 3 missiles
             {
                 bufferBullets.emplace_back(make_unique<Homing>(e->posX + e->largeur / 4, e->posY + e->hauteur + 1, false));
                 bufferBullets.emplace_back(make_unique<Homing>(e->posX + e->largeur - e->largeur / 4, e->posY + e->hauteur + 1, false));
                 bufferBullets.emplace_back(make_unique<Homing>(e->posX + e->largeur / 2, e->posY + e->hauteur + 1, false));
             }
 
-            if (e->typeEntite == BOSS && e->ammoType == HOMING)
+            if (e->getTypeEnnemi() == BOSS1_MAIN)    //verifie si c'est le main boss pour faire qu'il est invincible si on a pas tuer ces side boss
             {
                 e->invincible = false;
 
                 for (auto& e2 : listEntites)
                 {
-                    if (e2->enVie == true && e2->typeEntite == BOSS && e2->ammoType == LASER)
+                    if (e2->enVie == true && e2->getTypeEnnemi() == BOSS1_SIDE)
                     {
                         e->invincible = true;
                     }
@@ -329,22 +368,52 @@ void Interface::gererCollisions()
                                 bufferBullets.emplace_back(make_unique<BasicBullet>(e2->posX + i, e2->posY + 1, false));
 
                         e2->perdVie(1);
-                        e->enVie = false;
+                        e->enVie = false;   //la bullet meurt si elle entre en collision avec un ennemi
 
-                        if (!e2->enVie && e2->typeEntite != BULLET)
-                            score += 10;
+                        if (!e2->enVie && (e2->typeEntite == ENNEMI || e2->typeEntite == BOSS))
+                            score += customPoints(e2->getTypeEnnemi());
                     }
                 }
             }
         }
         else
             e->collisionJoueur = false;
-        //}
     }
     for (auto& bullet : bufferBullets)
         listEntites.push_back(move(bullet));	//on ajoute les bullets du buffer a la liste d'entites
 }
 
+int Interface::customPoints(typeEnnemis e)
+{
+    switch (e)
+    {
+    case BASIC:
+        return 10;
+        break;
+    case TANK:
+        return 20;
+        break;
+    case ARTILLEUR:
+        return 25;
+        break;
+    case DIVEBOMBER:
+        return 20;
+        break;
+    case ZAPER:
+        return 30;
+        break;
+    case AIMBOT:
+        return 20;
+        break;
+    case BOSS1_MAIN:
+        return 100;
+        break;
+    case BOSS1_SIDE:
+        return 50;
+        break;
+    }
+    return 0;
+}
 
 //met a jour l'affichage de la console 
 void Interface::updateAffichage()
@@ -498,7 +567,7 @@ void Interface::executionJeu()
         gererCollisions();
         enleverEntites();
         updateAffichage();
-        Sleep(25);
+        Sleep(20);
 
     }
     Sleep(1500);
