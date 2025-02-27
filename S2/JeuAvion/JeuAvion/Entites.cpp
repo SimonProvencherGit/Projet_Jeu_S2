@@ -213,7 +213,7 @@ void DiveBomber::update()
 Tank::Tank(int x, int y) : Ennemi(x, y)
 {
 	symbole = '@';
-	nbVies = 12;
+	nbVies = 10;
 	typeEnnemi = TANK;
 	hauteur = 1;
 	largeur = 9;
@@ -316,6 +316,39 @@ void Zaper::update()
 	if (moveTimer >= 500)
 		moveTimer = 0;
 }
+
+Aimbot::Aimbot(int x, int y) : Ennemi(x,y)
+{
+	moveTimer = rand() % shootCooldown;   //on set le timer de mouvement a un nombre aleatoire entre 0 et le cooldown de tir pour que les ennemis tirent a des moments differents
+	shoots = true;
+	symbole = 'X';
+	nbVies = 3;
+	typeEnnemi = AIMBOT;
+	hauteur = 2;
+	largeur = 3;
+	shootCooldown = 50;   // a toute les x frames l'entite va tirer
+	posRand = rand() % 6;   //donne une valeur qu'on va ajouter a son y pour pas qu'ils soient tous alignes
+	ammoType =  HOMING;
+}
+
+void Aimbot::update()
+{
+	if (posY <= (HEIGHT / 20) + posRand && moveTimer % 8 == 0)
+		posY++;
+
+	if (moveTimer % 50 == 0)
+	{
+		if (posX <= 1 || posX + largeur >= WIDTH - 1)
+			direction = 1 - direction; // Change de Direction
+		if (direction == 0)
+			posX -= 1;
+		else
+			posX += 1; // Bouger a gauche ou a droite
+	}
+
+	moveTimer++;
+}
+
 
 Boss1::Boss1(int x, int y) : Ennemi(x, y)
 {
@@ -533,5 +566,4 @@ void Obstacle::update()
 	if (nbVies <= 0)
 		enVie = false;
 }
-
 

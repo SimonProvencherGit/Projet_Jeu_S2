@@ -13,12 +13,11 @@ const int HEIGHT = 37;
 const int CD_BARRELROLL = 75;
 
 enum typeEntites { JOUEUR, ENNEMI, OBSTACLE, BULLET, BOSS};
-enum typeEnnemis { BASIC, RAPIDE, TANK, ARTILLEUR, DIVEBOMBER, ZAPER, BOSS1_MAIN, BOSS1_SIDE };
+enum typeEnnemis { BASIC, TANK, ARTILLEUR, DIVEBOMBER, ZAPER, AIMBOT, BOSS1_MAIN, BOSS1_SIDE };
 enum typeBullets { NORMAL, LASER, MULTIPLE, HOMING, BOMB, FRAGMENTING };
 
 class Entite
 {
-protected:
 
 public:
     int posX, posY;
@@ -115,6 +114,13 @@ class Zaper : public Ennemi
 public:
     Zaper(int x, int y);
     void update();    //gere le deplacement de l'ennemi
+};
+
+class Aimbot : public Ennemi
+{
+public:
+    Aimbot(int x, int y);
+    void update();
 };
 
 class Boss1 : public Ennemi
