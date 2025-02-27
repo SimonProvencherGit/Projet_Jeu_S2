@@ -262,7 +262,7 @@ void Interface::progressionDifficulte()
             {
                 enemySpawn(1, DIVEBOMBER);
                 enemySpawnTimer = 0;
-				bossWaitTimer = 0;
+				//bossWaitTimer = 0;
             }
         }
 		else
